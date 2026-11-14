@@ -6,7 +6,7 @@
 
 **A 3D motorsport game that runs right in your browser — and on your Android phone.**
 
-Open-wheelers, V8 touring cars and turbo street cars. Eight tracks with bridges, tunnels and a city circuit, a full career mode, damage, safety cars, pit stops, hills and rain.
+Open-wheelers, V8 touring cars, turbo street cars and go-karts. Eight tracks plus three kart circuits with bridges, tunnels and a city circuit, a full career mode, damage, safety cars, pit stops, hills and rain.
 
 [![Play in browser](https://img.shields.io/badge/%E2%96%B6%20PLAY%20NOW-in%20your%20browser-ff3b30?style=for-the-badge)](https://waynesimpson-spec.github.io/apex-grand-prix/)
 [![Download APK](https://img.shields.io/badge/ANDROID-Download%20APK-3ddc84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/waynesimpson-spec/apex-grand-prix/releases/latest/download/ApexGP.apk)
@@ -88,6 +88,7 @@ Plug in an **Xbox or PlayStation controller** at any time — it's picked up aut
 |---|---|---|
 | 🏎️ **Apex GP World Championship** | Open-wheel single seaters (DRS, ERS) | Lakeside Park → Costa Verde → Nordhavn Ring → Mount Kestrel |
 | 🚗 **Endurance Touring Series** | 1300 kg V8 touring cars | Costa Verde → Lakeside Park → Nordhavn Ring → Harbour Viaduct → Granite Pass → **Mountain 1000** finale |
+| 🛞 **Kart Championship** | 2-stroke or 4-stroke go-karts | Valle Verde → Rocca → Westfield (kart-only circuits) |
 | 🏁 **Street Turbo Cup** | 90s twin-turbo street coupes | Nordhavn Ring → Lakeside Park → Costa Verde → Harbour Viaduct → Granite Pass |
 
 **Eight tracks**
@@ -101,6 +102,7 @@ Plug in an **Xbox or PlayStation controller** at any time — it's picked up aut
 | **Harbour Viaduct Circuit** | Figure of eight | 4.8 km, a 1 km cable-stayed viaduct 13 m over the track below, and a tunnel under the hill |
 | **Granite Pass Circuit** | Mountain circuit | 5.1 km, a 470 m tunnel with turns inside, then a viaduct over the climb |
 | **Metropolis Grand Prix** | City circuit | 7.7 km through skyscrapers: harbour street section, dark tunnel, mountain climb, viaduct crossover |
+| **Valle Verde / Rocca / Westfield** | Kart circuits (karts only) | 0.95–1.35 km, tyre walls, tight hairpins and fast sweepers |
 | **Big Mama** | Fan-designed | 8.3 km round a lake: tunnel, a raised turn 10 m up, a self-crossing loop, city, forest and a rocky mountain |
 
 **Racing**
@@ -116,6 +118,7 @@ Plug in an **Xbox or PlayStation controller** at any time — it's picked up aut
 
 **Driving**
 - Car physics with downforce, weight transfer, tyre grip, and hills (gravity on climbs and descents, getting light over crests)
+- 🛞 **Go-karts** — light, fast, laid-back karts with a 2-stroke (chainsaw scream) or 4-stroke (thumper) engine, on their own kart circuits
 - Vehicle classes with their own handling, gearbox and engine sound: open-wheel (real F1 engine recording, 8 gears), touring race car (V8, 6 gears) and turbo street coupe; a grid of different body styles
 - Full assists like the big racing games: stability control, steering, braking, ABS, traction control, racing line, DRS and ERS
 - **9 cameras** — T-Cam, cockpit, helmet, nose, rear wing, third person, far chase, helicopter and TV broadcast, plus free look
