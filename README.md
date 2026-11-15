@@ -82,6 +82,8 @@ Plug in an **Xbox or PlayStation controller** at any time — it's picked up aut
 
 ## ✨ Features
 
+**Road to Apex GP** — a ladder career: start in a rental kart, pass graded licence tests (Bronze / Silver / Gold), race Kart Club and Street Turbo events for prize money, and buy your way up to faster cars. Pick your assists and difficulty before every event.
+
 **Career mode** — pick a championship, sign for a team and race a full season with points, standings and saved progress:
 
 | Championship | Vehicle | Calendar |
@@ -106,7 +108,8 @@ Plug in an **Xbox or PlayStation controller** at any time — it's picked up aut
 | **Big Mama** | Fan-designed | 8.3 km round a lake: tunnel, a raised turn 10 m up, a self-crossing loop, city, forest and a rocky mountain |
 
 **Racing**
-- 🤖 **19 AI rivals** with difficulty from 0 to 110 — they brake, overtake, defend, use DRS/ERS and make their own pit stops
+- 🤖 **19 AI rivals** on five levels — Easy, Medium, Hard, Very Hard and **Death** (flat-out, no mistakes, late braking, hard defending). They overtake, defend, use DRS/ERS and make their own pit stops
+- 📻 **Rival team radio** — men and women drivers yell (and swear) at you when you hit them, pass them or hold them up. Voice + text, text only, clean or off
 - 🚦 **Race weekend feel** — five-light starts, sector times (purple / green / yellow), fastest laps, chequered flag and points
 - 🛞 **Tyre strategy** — Soft, Medium, Hard, Intermediate and Full Wet, with wear that costs grip
 - 🔧 **Pit stops** — dive into the pit lane, the car drives the 80 km/h limiter to your garage and fits fresh tyres

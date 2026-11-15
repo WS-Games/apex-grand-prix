@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Track Clear Test</title>
+<style>
+:root{--bg:#0d0f14;--fg:#e8ebf0;--ok:#2bd46a;--bad:#ff4d4d;--mut:#8b93a1}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,Segoe UI,Arial;padding:20px 16px}
+h1{font-size:20px;margin:0 0 6px}p{color:var(--mut);margin:0 0 14px}
+#out div{padding:6px 10px;border-radius:6px;margin:3px 0;background:#161a22;font-family:Consolas,monospace;font-size:13px;white-space:pre-wrap}
+.ok{border-left:4px solid var(--ok)}.bad{border-left:4px solid var(--bad)}
+iframe{width:320px;height:180px;border:0;position:fixed;right:8px;bottom:8px;opacity:.6}
+</style></head><body>
+<h1>Track Clear Test</h1>
+<p>Builds every track exactly as the game does, checks that no building stands within 5 m of the barriers, that every visible barrier is solid (no barrier inside the drivable area), and fires downward rays across the full road width every few metres, starting 500 m up. Anything that is not part of the track itself (buildings, trees, grandstands, crowds, rocks...) sitting on or over the road fails the test. Bridges and tunnels over the road are allowed.</p>
+<div id="out"><div>Loading the game…</div></div>
+<pre id="result" style="display:none"></pre>
+<iframe id="f" src="../index.html"></iframe>
+<script>
+const out=document.getElementById('out'),res=document.getElementById('result');
+const line=(txt,cls)=>{const d=document.createElement('div');d.textContent=txt;if(cls)d.className=cls;out.appendChild(d);return d;};
+const f=document.getElementById('f');
+f.onload=()=>setTimeout(run,15000);
+function describe(o){let n=o;while(n&&!n.name&&n.parent&&n.parent.type!=='Scene')n=n.parent;
+  const m=o.material;const key=m&&m.customProgramCacheKey?m.customProgramCacheKey():'';
+  if(key==='tower1')return'building';if(o.isInstancedMesh)return o.geometry&&o.geometry.type?('instanced '+o.geometry.type.replace('Geometry','').toLowerCase()):'instanced object';
+  return(o.geometry&&o.geometry.type?o.geometry.type.replace('Geometry','').toLowerCase():'mesh');}
+function run(){
+  const g=f.contentWindow.__game;out.innerHTML='';if(!g){line('FAIL: the game did not start','bad');finish(false,['game did not start']);return;}
+  const T=g.THREE;const rc=new T.Raycaster();const down=new T.Vector3(0,-1,0),org=new T.Vector3();let allOk=true;const summary=[];
+  const ids=g.TRACKS.map(t=>t.id);let k=0;
+  const next=()=>{if(k>=ids.length){finish(allOk,summary);return;}
+    const id=ids[k++];const td=g.TRACKS.find(t=>t.id===id);
+    try{g.startRace({track:g.TRACKS.indexOf(td),cls:td.kart?'kart':'touring',laps:3,aiCount:0,grid:'mid',mode:'gp'});g.step(1);
+      const t=g.TR,N=t.N,hw=t.halfW;const objs=[];
+      g.trackGroup.traverse(o=>{if(!o.isMesh||o.userData.trk)return;let p=o.parent,trk=false;while(p&&p!==g.trackGroup){if(p.userData&&p.userData.trk)trk=true;p=p.parent;}if(trk)return;if(o.material&&o.material.transparent)return;objs.push(o);});
+      let rays=0;const hits=[];
+      for(let i=0;i<N;i+=3){const ry=t.py[i];for(let off=-hw;off<=hw+0.01;off+=hw/3){const x=t.px[i]+t.nx[i]*off,z=t.pz[i]+t.nz[i]*off;
+        org.set(x,ry+500,z);rc.set(org,down);rc.far=500-0.2;rays++;const h=rc.intersectObjects(objs,false);if(h.length&&h[0].point.y>ry+0.15)hits.push({x,z,y:h[0].point.y-ry,what:describe(h[0].object)});}}
+      // second check: no building's footprint within 5 m of the barriers (tall instanced boxes = buildings)
+      const M=new T.Matrix4(),P=new T.Vector3(),Q=new T.Quaternion(),S=new T.Vector3();
+      g.trackGroup.traverse(o=>{if(!o.isInstancedMesh||!o.geometry||o.geometry.type!=='BoxGeometry')return;for(let n=0;n<o.count;n++){o.getMatrixAt(n,M);M.decompose(P,Q,S);if(S.y<12||S.x===0)continue;
+        const hx=S.x/2,hz=S.z/2;for(const [cx,cz] of [[hx,hz],[-hx,hz],[hx,-hz],[-hx,-hz],[0,0]]){const v=new T.Vector3(cx,0,cz).applyQuaternion(Q).add(P);let bad=false;
+          for(let i=0;i<N;i+=2){const dx=t.px[i]-v.x,dz=t.pz[i]-v.z;const lim=Math.max(t.wallL[i],t.wallR[i])+5;if(dx*dx+dz*dz<lim*lim){bad=true;break;}}
+          if(bad){hits.push({x:P.x,z:P.z,y:S.y,what:'building next to the barrier'});break;}}}});
+      // third check: no visible barrier stands inside the area the car may drive (you could drive straight through it)
+      {const MT=g.MAT,bm=[MT.wall,MT.wall2,MT.tyreWall,MT.hay].filter(Boolean);const walls=[];g.trackGroup.traverse(o=>{if(o.isMesh&&bm.includes(o.material))walls.push(o);});
+       const sides=bm.map(m=>m.side);bm.forEach(m=>m.side=T.DoubleSide);const hr=new T.Raycaster();const dir=new T.Vector3();
+       for(let i=0;i<N;i+=3){if(t.tn&&t.tn[i])continue;for(const sd of [1,-1]){const lim=(sd>0&&t.divP&&t.divP[i])?10.4:(sd>0?t.wallL[i]:t.wallR[i]); /* the pit wall between track and pit lane is solid in the game too */dir.set(t.nx[i]*sd,0,t.nz[i]*sd);org.set(t.px[i],t.py[i]+0.5,t.pz[i]);hr.set(org,dir);hr.far=lim-0.9;
+         const h=hr.intersectObjects(walls,false);if(h.length)hits.push({x:h[0].point.x,z:h[0].point.z,y:0,what:'barrier you can drive through ('+h[0].distance.toFixed(1)+'m, limit '+lim.toFixed(1)+'m)'});}}
+       bm.forEach((m,k)=>m.side=sides[k]);}
+      if(hits.length){allOk=false;
+
+const kinds={};for(const h of hits)kinds[h.what]=(kinds[h.what]||0)+1;
+        const where=hits.slice(0,5).map(h=>h.what+' at ('+Math.round(h.x)+','+Math.round(h.z)+') '+h.y.toFixed(1)+'m up').join('\n   ');
+        line('FAIL '+td.name+': '+hits.length+'/'+rays+' rays hit something on the road ('+Object.entries(kinds).map(e=>e[1]+' '+e[0]).join(', ')+')\n   '+where,'bad');summary.push('FAIL '+id+' '+hits.length+'/'+rays+' '+JSON.stringify(kinds)+' e.g. '+hits.slice(0,3).map(h=>h.what+'@'+Math.round(h.x)+','+Math.round(h.z)).join(' '));}
+      else{line('PASS '+td.name+': '+rays+' rays, nothing on the road','ok');summary.push('PASS '+id+' '+rays);}
+    }catch(e){allOk=false;line('FAIL '+td.name+': error '+e.message,'bad');summary.push('FAIL '+id+' error '+e.message);}
+    setTimeout(next,50);};
+  next();}
+function finish(ok,summary){line(ok?'ALL TRACKS CLEAR':'SOME TRACKS HAVE THINGS ON THE ROAD',ok?'ok':'bad');res.textContent=(ok?'RESULT PASS':'RESULT FAIL')+' || '+summary.join(' || ');document.title=ok?'PASS':'FAIL';}
+</script></body></html>
