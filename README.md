@@ -8,9 +8,9 @@
 
 Open-wheelers, V8 touring cars, turbo street cars and go-karts. Eight tracks plus five kart circuits (including a figure-eight with a bridge and an indoor spiral tower) with bridges, tunnels and a city circuit, a full career mode, damage, safety cars, pit stops, hills and rain.
 
-[![Play in browser](https://img.shields.io/badge/%E2%96%B6%20PLAY%20NOW-in%20your%20browser-ff3b30?style=for-the-badge)](https://waynesimpson-spec.github.io/apex-grand-prix/)
-[![Download APK](https://img.shields.io/badge/ANDROID-Download%20APK-3ddc84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/waynesimpson-spec/apex-grand-prix/releases/latest/download/ApexGP.apk)
-[![Release](https://img.shields.io/github/v/release/waynesimpson-spec/apex-grand-prix?style=for-the-badge&color=1e7bff)](https://github.com/waynesimpson-spec/apex-grand-prix/releases/latest)
+[![Play in browser](https://img.shields.io/badge/%E2%96%B6%20PLAY%20NOW-in%20your%20browser-ff3b30?style=for-the-badge)](https://ws-games.github.io/apex-grand-prix/)
+[![Download APK](https://img.shields.io/badge/ANDROID-Download%20APK-3ddc84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/WS-Games/apex-grand-prix/releases/latest/download/ApexGP.apk)
+[![Release](https://img.shields.io/github/v/release/WS-Games/apex-grand-prix?style=for-the-badge&color=1e7bff)](https://github.com/WS-Games/apex-grand-prix/releases/latest)
 
 <br>
 
@@ -24,8 +24,8 @@ Open-wheelers, V8 touring cars, turbo street cars and go-karts. Eight tracks plu
 
 | Platform | How |
 |---|---|
-| **Browser (PC / Mac / phone)** | Open **[waynesimpson-spec.github.io/apex-grand-prix](https://waynesimpson-spec.github.io/apex-grand-prix/)** in Chrome or Edge. On a phone you can tap **⋮ → Add to Home screen** to install it — it then works offline. |
-| **Android app** | Download **[ApexGP.apk](https://github.com/waynesimpson-spec/apex-grand-prix/releases/latest/download/ApexGP.apk)**, tap it, and allow installing from your browser / files app when asked. Android 7+, fully offline. |
+| **Browser (PC / Mac / phone)** | Open **[ws-games.github.io/apex-grand-prix](https://ws-games.github.io/apex-grand-prix/)** in Chrome or Edge. On a phone you can tap **⋮ → Add to Home screen** to install it — it then works offline. |
+| **Android app** | Download **[ApexGP.apk](https://github.com/WS-Games/apex-grand-prix/releases/latest/download/ApexGP.apk)**, tap it, and allow installing from your browser / files app when asked. Android 7+, fully offline. |
 | **Windows (local)** | Download the code and double-click `Play Apex GP.bat`. |
 
 Plug in an **Xbox or PlayStation controller** at any time — it's picked up automatically (with vibration).
