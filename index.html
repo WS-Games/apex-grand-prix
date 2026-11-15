@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Apex GP">
+<link rel="apple-touch-icon" href="icon-192.png">
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="theme-color" content="#04060a">
 <link rel="manifest" href="manifest.json">
 <title>Apex Grand Prix</title>
@@ -152,11 +155,17 @@ html,body{touch-action:none;overscroll-behavior:none;-webkit-tap-highlight-color
 #rotate .ph{width:70px;height:120px;border:5px solid #fff;border-radius:14px;animation:rot 2s infinite}
 @keyframes rot{0%,30%{transform:rotate(0)}60%,100%{transform:rotate(90deg)}}
 @media (orientation:portrait){body.touchdev #rotate{display:flex}}
+/* no pinch / double-tap zoom or page bounce on phones: the game always fills the screen at phone size */
+html,body{touch-action:none;overscroll-behavior:none;-webkit-text-size-adjust:100%;-webkit-user-select:none;user-select:none}
+input{touch-action:manipulation;-webkit-user-select:text;user-select:text}
+#iosTip{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);background:rgba(10,12,18,.9);color:#fff;font:600 14px 'Exo 2',system-ui;padding:8px 14px;border-radius:8px;z-index:99;display:none;max-width:92vw;text-align:center}
+/* phones and tablets: bigger, easier-to-tap menus */
+body.touchdev .menu-btn{font-size:27px;padding:12px 26px}body.touchdev .row{font-size:20px;padding:11px 14px}body.touchdev .hdr{font-size:38px}body.touchdev .desc{font-size:16px}body.touchdev .sub{font-size:15px}body.touchdev .menu-btn small{font-size:15px}
 body.touchdev .hints,body.touchdev #padInd{display:none!important}
 @media (max-height:500px){.col{padding:18px 30px}.logo .a{font-size:52px}.logo .b{font-size:24px}.menu-btn{font-size:22px;padding:8px 20px}.hdr{font-size:28px}.row{font-size:16px;padding:7px 12px}.sub{margin-bottom:10px}.desc{min-height:40px;padding:8px 12px;font-size:14px}}
 </style>
 </head>
-<body>
+<body><div id="copyr" style="position:fixed;left:14px;bottom:8px;z-index:4;font:600 12px 'Exo 2',system-ui;color:rgba(255,255,255,.55);pointer-events:none">© 2026 WS Games · All rights reserved</div>
 <div id="gl"></div>
 <div id="loading">LOADING…</div>
 
@@ -203,7 +212,7 @@ body.touchdev .hints,body.touchdev #padInd{display:none!important}
 <div class="screen shade" id="main">
   <div class="col">
     <div class="logo" style="margin-bottom:50px"><span class="a">APEX</span><span class="b">GRAND PRIX</span></div>
-    <div class="menu-btn fc" data-act="road">Road to Apex GP</div><div class="menu-btn fc" data-act="drift">Drift Career</div>
+    <div class="menu-btn fc" data-act="road">Road to Apex GP</div><div class="menu-btn fc" data-act="drift">Drift Career</div><div class="menu-btn fc" data-act="mp">Multiplayer</div>
     <div class="menu-btn fc" data-act="career">Career</div>
     <div class="menu-btn fc" data-act="race">Quick Race</div>
     <div class="menu-btn fc" data-act="tt">Time Trial</div>
@@ -230,6 +239,13 @@ body.touchdev .hints,body.touchdev #padInd{display:none!important}
   </div>
 </div>
 
+<div class="screen shade" id="mp">
+  <div class="col" style="width:min(1000px,100%)">
+    <div class="hdr" id="mpTitle">Multiplayer</div>
+    <div class="sub" id="mpSub"></div>
+    <div class="rows" id="mpBody"></div>
+  </div>
+</div>
 <div class="screen shade" id="drift">
   <div class="col" style="width:min(1000px,100%)">
     <div class="hdr" id="driftTitle">Drift Career</div>
@@ -336,12 +352,12 @@ const DEFAULTS={
 };
 const isTouch=(window.matchMedia&&matchMedia('(pointer:coarse)').matches)||('ontouchstart' in window);
 Object.assign(DEFAULTS,{touch:'auto',touchSteer:'buttons',tiltSens:100});
-if(isTouch)Object.assign(DEFAULTS,{aiCount:11,hudScale:85,steerAssist:true}); // phones get the same full graphics as desktop (Auto Resolution keeps it smooth)
+if(isTouch)Object.assign(DEFAULTS,{aiCount:11,hudScale:110,steerAssist:true}); // phones get the same full graphics as desktop (Auto Resolution keeps it smooth)
 if(isTouch)document.body.classList.add('touchdev');
 const SKEY='apexgp_settings_v1';
 let S=Object.assign({},DEFAULTS);
 try{const j=JSON.parse(localStorage.getItem(SKEY)||'{}');Object.assign(S,j);}catch(e){}
-if(S.radio==null)S.radio="on";if(S.commentary==null)S.commentary="on";if(S.nameTags==null)S.nameTags=true;S.modelCredits="cc";/* five AI levels (the number underneath drives skill, grip, mistakes and racecraft) */const AI_LEVELS=[[40,"Easy"],[70,"Medium"],[92,"Hard"],[105,"Very Hard"],[125,"Death"]];const aiLevelName=d=>{let b=AI_LEVELS[0];for(const L of AI_LEVELS)if(Math.abs(L[0]-d)<Math.abs(b[0]-d))b=L;return b[1];};{let b=AI_LEVELS[1][0];for(const L of AI_LEVELS)if(Math.abs(L[0]-S.aiDiff)<Math.abs(b-S.aiDiff))b=L[0];S.aiDiff=b;}
+if(isTouch&&!S.mob2){S.mob2=true;if((S.hudScale||100)<105)S.hudScale=110;}if(S.radio==null)S.radio="on";if(S.commentary==null)S.commentary="on";if(S.nameTags==null)S.nameTags=true;S.modelCredits="cc";/* five AI levels (the number underneath drives skill, grip, mistakes and racecraft) */const AI_LEVELS=[[40,"Easy"],[70,"Medium"],[92,"Hard"],[105,"Very Hard"],[125,"Death"]];const aiLevelName=d=>{let b=AI_LEVELS[0];for(const L of AI_LEVELS)if(Math.abs(L[0]-d)<Math.abs(b[0]-d))b=L;return b[1];};{let b=AI_LEVELS[1][0];for(const L of AI_LEVELS)if(Math.abs(L[0]-S.aiDiff)<Math.abs(b-S.aiDiff))b=L[0];S.aiDiff=b;}
 if(S.vclass==='street'){S.vclass='touring';S.carType='street';}if(!['f1','touring','kart','drift'].includes(S.vclass))S.vclass='f1';if(S.carType!=='street')S.carType='race';if(S.kartType!=='4')S.kartType='2';
 // touring has two car types: the supercharged V8 race car or the turbo street coupe
 const effCls=()=>S.vclass==='touring'&&S.carType==='street'?'street':(S.vclass==='kart'&&S.kartType==='4'?'kart4':S.vclass);
@@ -720,7 +736,7 @@ const CLASSES={
     cams:{tcam:[-0.35,1.05,-1.1,0.04],cockpit:[-0.36,0.88,-7,0.04],helmet:[-0.3,0.79,-1.4,0.04],nose:[0.85,0.32,-0.5,0],wing:[-0.95,0.62,-0.7,0]},chase:[3.4,1.3,5.2,2.1]},
   // 90s Japanese twin-turbo coupe: inline six, big turbo, light and tail-happy
   street:{name:'Street Turbo',maxAI:19,
-    phys:{m:1450,a:1.25,b:1.3,L:2.55,Iz:1700,h:0.45,g:9.81,cd:0.38,cl:0.45,rr:200,R:0.33,idle:900,redline:7200,brakeMax:30000,peakT:600,peakRpm:4800,gear1:10.2,gearTop:3.3,nGears:6,upRpm:6900,downRpm:4500,fire:3,muScale:0.9,maxSteer:0.55,steerV:32,ers:false,drs:false,aeroF:0.4,power:400000,halfWidth:0.95,colR:1.0,colOff:[1.3,-1.3],gridGap:9,gridOff:2.8,launchRpm:4000},
+    phys:{m:1450,a:1.25,b:1.3,L:2.55,Iz:1700,h:0.45,g:9.81,cd:0.38,cl:0.45,rr:200,R:0.33,idle:900,redline:7200,brakeMax:30000,peakT:600,peakRpm:4800,gear1:10.2,gearTop:3.3,nGears:6,upRpm:6900,downRpm:4500,fire:3,muScale:1.0,maxSteer:0.62,steerV:40,ers:false,drs:false,aeroF:0.4,power:400000,halfWidth:0.95,colR:1.0,colOff:[1.3,-1.3],gridGap:9,gridOff:2.8,launchRpm:4000},
     cams:{tcam:[-0.2,1.55,-1.2,0],cockpit:[-0.45,1.3,-2.8,-0.35],helmet:[-0.43,1.29,-2.7,-0.35],nose:[2.3,0.68,-0.6,0],wing:[-2.6,1.45,-1.0,0]},chase:[7.0,2.4,10.8,3.8]}, // lower roof than the sedans, so the driver sits lower
 };
 let PHYS=null,GEARS=[],VCLASS='f1';
@@ -1999,6 +2015,36 @@ function coupeDecals(m,team,num,cls){const R=Math.random;const sp=(MESH_FOR_PLAY
   top.material.map=tex.clone();top.material.map.repeat.set(0.25,1);top.material.map.needsUpdate=true;top.rotation.x=-Math.PI/2;top.position.set(0,0.98,1.45);top.renderOrder=3;m.body.add(top);
   if(R()<0.6){const st=new THREE.Mesh(new THREE.PlaneGeometry(0.28,4.2),new THREE.MeshBasicMaterial({color:new THREE.Color(team&&team.c2||'#fff'),transparent:true,opacity:0.92,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-3}));st.rotation.x=-Math.PI/2;st.position.set(R()<0.5?0:0.32,1.0,0.05);st.renderOrder=2;}
   return m;}
+/* JDM drift cockpit: coloured roll cage with door bars, bucket seat with harness, row of gauges on the dash, gold shift knob, bare aluminium door cards */
+function jdmCabin(body,ti){const g=new THREE.Group();body.add(g);
+  const cageC=['#b8ff1a','#9b30ff','#ff2a2a','#2ad4ff','#ff8a00'][ti%5],beltC=ti%2?'#8e2bff':'#d61f1f';
+  const cage=new THREE.MeshStandardMaterial({color:cageC,roughness:0.35,metalness:0.4}),belt=new THREE.MeshStandardMaterial({color:beltC,roughness:0.7}),seatM=new THREE.MeshStandardMaterial({color:0x15161a,roughness:0.85}),alu=new THREE.MeshStandardMaterial({color:0xc9ced6,metalness:0.85,roughness:0.3});
+  const tube=(a,b,r=0.022)=>{const A=new THREE.Vector3(...a),B=new THREE.Vector3(...b),d=B.clone().sub(A);const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,d.length(),10),cage);m.position.copy(A).add(B).multiplyScalar(0.5);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());g.add(m);};
+  const box=(w,h,d,x,y,z,m,rx=0)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.rotation.x=rx;g.add(o);return o;};
+  /* cage: main hoop behind the seats, front hoop along the A-pillars, roof bars, door bars, diagonal */
+  for(const sx of [1,-1]){tube([sx*0.74,0.45,-0.98],[sx*0.72,1.32,-0.98]);tube([sx*0.76,0.5,0.95],[sx*0.68,1.33,0.5]);tube([sx*0.68,1.33,0.5],[sx*0.72,1.33,-0.98]);
+    tube([sx*0.76,0.52,0.9],[sx*0.74,0.62,-0.98]);tube([sx*0.76,0.82,0.75],[sx*0.74,0.48,-0.6]);}
+  tube([-0.72,1.32,-0.98],[0.72,1.32,-0.98]);tube([-0.68,1.33,0.5],[0.68,1.33,0.5]);tube([-0.72,1.3,-0.98],[0.74,0.5,-0.98]);
+  /* bucket seat: tall side bolsters, head wings, harness */
+  for(const sx of [1,-1]){box(0.07,0.75,0.42,-0.35+sx*0.24,0.86,-0.8,seatM);box(0.06,0.22,0.2,-0.35+sx*0.19,1.28,-0.88,seatM);}
+  for(const sx of [1,-1]){box(0.055,0.62,0.012,-0.35+sx*0.09,0.95,-0.77,belt,-0.12);box(0.055,0.28,0.012,-0.35+sx*0.12,0.6,-0.55,belt,-1.2);}
+  box(0.06,0.3,0.012,-0.35,0.58,-0.45,belt,-0.9);box(0.11,0.11,0.02,-0.35,0.72,-0.55,alu,-0.9);
+  /* row of gauges on the dash */
+  const face=new THREE.MeshBasicMaterial({color:0xf2f2ee}),needle=new THREE.MeshBasicMaterial({color:0xff3b30}),bez=new THREE.MeshStandardMaterial({color:0x2a2c31,metalness:0.6,roughness:0.3});
+  for(let k=0;k<6;k++){const x=-0.12+k*0.085;const cup=new THREE.Mesh(new THREE.CylinderGeometry(0.036,0.036,0.05,16),bez);cup.rotation.x=Math.PI/2-0.5;cup.position.set(x,1.035,0.6);g.add(cup);
+    const f=new THREE.Mesh(new THREE.CircleGeometry(0.031,16),face);f.position.set(x,1.035+0.012,0.6-0.022);f.rotation.set(-0.5,Math.PI,0);g.add(f);const nd=new THREE.Mesh(new THREE.PlaneGeometry(0.004,0.026),needle);nd.position.set(x,1.035+0.016,0.6-0.03);nd.rotation.set(-0.5,Math.PI,0.6-k*0.3);g.add(nd);}
+  /* gold translucent shift knob */const kn=new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.024,0.13,14),new THREE.MeshStandardMaterial({color:0xffc83a,metalness:0.3,roughness:0.1,transparent:true,opacity:0.82}));kn.position.set(0.02,0.97,0.14);kn.rotation.x=-0.3;g.add(kn);
+  /* bare aluminium door cards */for(const sx of [1,-1])box(0.02,0.5,1.4,sx*0.83,0.75,0.0,alu);
+  /* 90s dash: black instrument hood with two big dials, centre stack with twin vents and a radio/climate panel, passenger vent */
+  {const dk=new THREE.MeshStandardMaterial({color:0x17181c,roughness:0.75}),dial=new THREE.MeshBasicMaterial({color:0x0b0c0f}),mark=new THREE.MeshBasicMaterial({color:0xf0f0f0}),orange=new THREE.MeshBasicMaterial({color:0xff7a1a}),btn=new THREE.MeshStandardMaterial({color:0x3a3d44,roughness:0.5});
+   box(0.46,0.09,0.2,-0.35,1.03,0.56,dk);box(0.46,0.02,0.24,-0.35,1.08,0.55,dk,-0.15);
+   for(const [dx,rr] of [[-0.1,0.07],[0.1,0.07]]){const d=new THREE.Mesh(new THREE.CircleGeometry(rr,24),dial);d.position.set(-0.35+dx,1.005,0.465);d.rotation.set(0.2,Math.PI,0);g.add(d);
+     for(let k=0;k<9;k++){const a=-2.2+k*0.55;const tk=new THREE.Mesh(new THREE.PlaneGeometry(0.004,0.014),mark);tk.position.set(-0.35+dx+Math.sin(a)*rr*0.82,1.005+Math.cos(a)*rr*0.82*0.98,0.462);tk.rotation.set(0.2,Math.PI,-a);g.add(tk);}
+     const nd=new THREE.Mesh(new THREE.PlaneGeometry(0.005,rr*0.8),orange);nd.position.set(-0.35+dx+0.02,1.005+0.015,0.46);nd.rotation.set(0.2,Math.PI,-0.9);g.add(nd);}
+   box(0.32,0.34,0.06,0.05,0.82,0.5,dk);for(const vx of [-0.06,0.07]){box(0.11,0.07,0.02,0.05+vx,0.93,0.468,btn);for(let k=0;k<4;k++)box(0.1,0.006,0.012,0.05+vx,0.905+k*0.016,0.458,dk);}
+   box(0.24,0.06,0.02,0.05,0.84,0.468,btn);for(let k=0;k<6;k++)box(0.025,0.018,0.01,0.05-0.09+k*0.036,0.84,0.456,new THREE.MeshBasicMaterial({color:k===2?0xff3b30:0x8fd7ff}));
+   box(0.2,0.05,0.02,0.05,0.76,0.468,btn);box(0.14,0.06,0.02,0.45,0.92,0.47,btn);for(let k=0;k<4;k++)box(0.13,0.006,0.012,0.45,0.895+k*0.016,0.46,dk);}
+  return g;}
 function makeModelCar(kind,team,helmet,num,alt){const T=MODELS[kind],I=MODEL_INFO[kind],P=CLASSES[I.cls].phys;
   const root=new THREE.Group(),body=new THREE.Group();root.add(body);
   const wb=Math.abs(T.W.FL.position.z-T.W.RL.position.z),sc=P.L/wb;
@@ -2029,7 +2075,7 @@ function makeModelCar(kind,team,helmet,num,alt){const T=MODELS[kind],I=MODEL_INF
     const done=new Map();if(kind!=='f1')fp.root.traverse(o=>{if(!o.isMesh||!o.material||!o.material.color||o.material.transparent||Object.prototype.hasOwnProperty.call(o.material,'onBeforeCompile'))return;let m2=done.get(o.material);
       if(!m2){m2=o.material.clone();const c=m2.color;const l=0.3*c.r+0.59*c.g+0.11*c.b;if(l<0.18&&TH[2]>0)c.lerp(new THREE.Color(TH[0]),TH[2]*0.6);/* subtle: trim, not a brown cabin */done.set(o.material,m2);}o.material=m2;});
     if(fp.swheel&&kind!=='f1')fp.swheel.traverse(o=>{if(o.isMesh&&o.material&&o.material.color){o.material=o.material.clone();o.material.color.lerp(new THREE.Color(TH[1]),0.2);}});
-    if(kind==='gt3')luxuryCabin(fp.body,TH,c1,c2);}catch(e){fp=null;}}
+    if(kind==='gt3')luxuryCabin(fp.body,TH,c1,c2);if(kind==='supra'||kind==='s14')jdmCabin(fp.body,ti);}catch(e){fp=null;}}
   const holders=steer.concat(wheels.slice(2).map(w=>w.parent));
   return{root,body,wheels,steer,rings:[],flap:new THREE.Group(),helmet:hg,bodyM:paint,swheel:null,brakeM,lod:[hi,lo],flames,model:kind,fp,mParts:[hi,...holders]};}
 function exhaustPop(c){try{if(!AU||!AU.ctx||!AU.master||!audioReady)return;const dx=c.x-camera.position.x,dz=c.z-camera.position.z,d=Math.sqrt(dx*dx+dz*dz);if(d>70)return;
@@ -2568,7 +2614,7 @@ function unlockAudio(){
     // street car: the same V8 as the touring car, tuned a little brighter and raspier
     ENG_I6={f1:120,g1:8.5,f2:440,g2:3.5,cut0:220,cutT:950,cutR:0.04,nMul:6,det:1.009,tame:0.17};void i6W;
     // go-kart: two-stroke single, fires every revolution: sharp ringing pulses and lots of rasp (chainsaw buzz)
-    const kW=cycleWave([{at:0,amp:1},{at:0.5,amp:0.93}],0.012,2.4);ENG_KART={f1:1300,g1:7,f2:3200,g2:5,cut0:1800,cutT:5200,cutR:0.12,nMul:3,det:1.015,am:5};
+    const kW=cycleWave([{at:0,amp:1},{at:0.5,amp:0.42},{at:0.27,amp:0.18}],0.03,1.5);ENG_KART={f1:620,g1:9,f2:1450,g2:5,cut0:900,cutT:2600,cutR:0.05,nMul:1.6,det:1.032,am:11,rpmMul:0.78};
     AU.kartEng=mkEng(AU.engBus,kW,ENG_KART);AU.kartAi=[mkEng(AU.engBus,kW,ENG_KART),mkEng(AU.engBus,kW,ENG_KART)];
     // 4-stroke kart: one fat pulse every other revolution, deep and thumpy
     const k4W=cycleWave([{at:0,amp:1}],0.035,1.1);const ENG_K4={f1:260,g1:8,f2:900,g2:4,cut0:500,cutT:2600,cutR:0.18,nMul:5,det:1.01,am:2.5};
@@ -2675,6 +2721,7 @@ function updateAudio(){
     else setVoiceP(vv,r/120,car.throttle,vol*1.2,260+car.throttle*1900+r*0.09,0.02);};
   let rpm=c.rpmD;if(c.limiter)rpm-=Math.random()*(cls==='mx'?900:350);
   let vol=(cls!=='f1'?0.15:0.13)+c.throttle*0.21; // loud and aggressive, opens right up on throttle
+  if(c.finished&&race)vol*=Math.max(0.3,1-(race.t-c.finishTime)/5);
   if(c.gear!==lastGear){const up=c.gear>lastGear;mine.out.gain.cancelScheduledValues(t);
     if(up){mine.out.gain.setValueAtTime(vol*0.3,t);mine.out.gain.linearRampToValueAtTime(vol*1.15,t+0.06);}
     else{mine.out.gain.setValueAtTime(vol,t);} /* downshift: no pops */
@@ -2838,7 +2885,7 @@ function startRace(cfg={}){
   if(cls!=='mx'&&TRACKS[tIdx].dirt)tIdx=0;
   const restore={weather:S.weather};if(cfg.weather)S.weather=cfg.weather;
   setClass(cls);
-  rnd=mulberry((Date.now()&0xffff)+7);
+  rnd=mulberry(cfg.seed!=null?cfg.seed:((Date.now()&0xffff)+7));
   // rebuild track if needed (meshes and AI speed profile depend on the vehicle class)
   if(!TR||TR.def!==TRACKS[tIdx]||TR.cls!==cls){TR=buildTrackData(TRACKS[tIdx]);TR.cls=cls;buildTrackMeshes();drawMinimapBase();}
   applyTOD();
@@ -2862,7 +2909,7 @@ function startRace(cfg={}){
   order.splice(pi,0,player);cars=order;
   const L=TR.L;
   cars.forEach((c,k)=>{c.reset();if(PHYS.bike)c.place(L-6-Math.floor(k/8)*6,-3.85+(k%8)*1.1);else c.place(L-12-k*PHYS.gridGap,k%2===0?-PHYS.gridOff:PHYS.gridOff);c.gear=1;c.setTyre(c.isPlayer?(S.startTyre==='auto'?autoTyre():S.startTyre):(isWet()?autoTyre():(rnd()<0.6?'M':(rnd()<0.5?'S':'H'))));c.nextTyre=isWet()?autoTyre():(c.tyre==='H'?'M':'H');c.ersMode=1;c.gridPos=k+1;});
-  race={pPace:1.0,pLastIdx:null,aiD:d,drift:(cfg.drift||cls==='drift')?{...(cfg.drift||{event:null}),total:0,run:0,mult:1,chainT:0,idle:0,best:0}:null,road:cfg.road?{...cfg.road}:null,mode,laps:mode==='tt'?Infinity:(cfg.laps||S.laps),trackIdx:tIdx,cls,career:!!cfg.career,round:cfg.round,restore,awarded:false,t:0,phase:'lights',lightT:0,lightsOn:0,goDelay:0.6+rnd()*2.0,finishOrder:[],bestLap:null,bestLapBy:null,bestSec:[null,null,null],resultT:null,msgT:0,
+  race={mp:!!cfg.mp,pPace:1.0,pLastIdx:null,aiD:d,drift:(cfg.drift||cls==='drift')?{...(cfg.drift||{event:null}),total:0,run:0,mult:1,chainT:0,idle:0,best:0}:null,road:cfg.road?{...cfg.road}:null,mode,laps:mode==='tt'?Infinity:(cfg.laps||S.laps),trackIdx:tIdx,cls,career:!!cfg.career,round:cfg.round,restore,awarded:false,t:0,phase:'lights',lightT:0,lightsOn:0,goDelay:0.6+rnd()*2.0,finishOrder:[],bestLap:null,bestLapBy:null,bestSec:[null,null,null],resultT:null,msgT:0,
     started:false,flag:''};
   if(mode==='tt'){race.phase='go';race.started=true;race.lightsOn=0;const c=player;c.place(L-150,0);c.lap=-1;}
   camMode=S.camera;state='race';
@@ -2874,7 +2921,7 @@ function startRace(cfg={}){
   towerT=0;lastPlayerPos=0;showMsg(mode==='tt'?'TIME TRIAL':'',2);
   if(audioReady&&AU.ctx.state==='suspended')AU.ctx.resume();
   hudApply();
-  try{pickRival();}catch(e){}
+  try{if(cfg.mp)mpSetupRace(cfg);else pickRival();}catch(e){console.warn(e);}
 }
 function raceAction(a){
   if(!race)return;const c=player;
@@ -2921,7 +2968,7 @@ function debrisUpdate(dt){for(const d of DEBRIS.pool){if(!d.visible)continue;con
   if(d.position.y<u.gy){d.position.y=u.gy;u.v.y*=-0.3;u.v.x*=0.6;u.v.z*=0.6;u.w.multiplyScalar(0.5);if(Math.abs(u.v.y)<0.5){u.v.y=0;u.w.set(0,0,0);}}}}
 function retireCar(c){const r=race;c.dnf=true;c.wreckT=0;c.throttle=0;c.brake=1;
   if(c.isPlayer){if(r.resultT===null||r.resultT===undefined)r.resultT=r.t+6;}else showMsg(c.name+' OUT<small>Car destroyed</small>',2,true,'#ff3b30');
-  if(S.safetyCar&&r.mode==='gp'&&!r.sc&&r.started)deploySC();}
+  if(S.safetyCar&&r.mode==='gp'&&!r.sc&&r.started&&!r.mp)deploySC();}
 let SC=null;
 function deploySC(){const r=race,t=TR;let lead=null;for(const c of cars)if(!c.dnf&&(!lead||c.lap*t.L+c.s>lead.lap*t.L+lead.s))lead=c;if(!lead)return;
   r.sc={s:(lead.s+170)%t.L,v:20,dist:0,t:0,phase:'out'};
@@ -2969,19 +3016,22 @@ function updateRace(dt){
   if(r.started)r.t+=dt;
   // controls
   for(const c of cars){
+    if(c.remote)continue;
     if(c.isPlayer&&!c.finished)playerControl(c,dt);else aiControl(c,dt);
     if(!r.started){c.brake=1;if(!c.isPlayer)c.throttle=0.35;}
     gearbox(c,dt);
   }
   // physics
   const H=1/240;let steps=Math.min(14,Math.max(1,Math.round(dt/H)));const h=dt/steps;
-  if(r.started){for(let k=0;k<steps;k++){for(const c of cars){if(c.inPit)continue;c.physStep(h);}}}
+  if(r.started){for(let k=0;k<steps;k++){for(const c of cars){if(c.inPit||c.remote)continue;c.physStep(h);}}}
   else{ // cars held on the grid until lights out: engines rev, nothing moves
     for(const c of cars){c.vx=c.vy=c.r=0;c.gear=1;const th=c.isPlayer?Input.throttle:0.3+0.25*Math.max(0,Math.sin(r.lightT*3+c.i));c.throttle=th;c.rpm=lerp(c.rpm,PHYS.idle+th*(PHYS.redline-PHYS.idle)*0.7,0.15);}}
   for(const c of cars)if(c.inPit)pitUpdate(c,dt);
   if(S.collisions)collide();
   // progress
+  if(r.mp)mpTick(r,dt);
   for(const c of cars){
+    if(c.remote){mpRemoteTick(c,dt);c.sPrev=c.s;continue;}
     c.updateTrackPos();
     if(c.ghostT>0)c.ghostT-=dt;
     // lap crossing
@@ -3021,7 +3071,7 @@ function updateRace(dt){
   computePositions();
   if(r.started&&player&&lastPlayerPos&&player.pos<lastPlayerPos&&!player.finished)cheer(0.55,1.6);if(player)lastPlayerPos=player.pos;
   // finish
-  if(player.finished&&r.resultT===null)r.resultT=r.t+5;
+  if(player.finished&&r.resultT===null)r.resultT=r.t+(r.mp?60:5);
   if(r.resultT!==null&&(r.t>r.resultT||cars.every(c=>c.finished))){showResults();}
   // rumble
   rumbleT-=dt;if(rumbleT<=0){rumbleT=0.1;const c=player;let s=0,w=0;if(c.onKerb){s=0.25+c.speed/200;w=0.4;}if(c.surfMu<0.9&&!c.onKerb){s=Math.max(s,0.35);w=0.5;}if(c.slide>0.4){w=Math.max(w,Math.min(0.6,c.slide*0.4));}if(c.limiter)w=Math.max(w,0.15);if(c.lockF){s=Math.max(s,0.5);}if(s>0||w>0)rumble(s,w,120);}
@@ -3038,6 +3088,7 @@ function onLine(c){
   c.secStart=c.lapStart;c.sector=0;c.lapInvalid=false;c.secTimes=[null,null,null];
   if(c.isPlayer&&r.mode==='gp'&&c.lap===r.laps-1)showMsg('FINAL LAP',1.6);
   if(r.mode==='gp'&&c.lap>=r.laps&&!c.finished){c.finished=true;c.finishTime=r.t+(c.penalty||0);{let k=r.finishOrder.length;while(k>0&&r.finishOrder[k-1].finishTime>c.finishTime)k--;r.finishOrder.splice(k,0,c);}
+    if(c===player&&r.mp)try{mpSendState(r);}catch(e){}
     if(c.isPlayer){const p=r.finishOrder.length;showMsg('CHEQUERED FLAG<small>You finished P'+(cars.indexOf(c)+1)+'</small>',4);r.flag='check';cheer(1.2,5);}}
 }
 function secDone(c,k,st){const r=race;if(c.lapInvalid&&c.isPlayer)return;
@@ -3129,7 +3180,7 @@ function aiControl(c,dt){
   const fw=dx*sh+dz*ch,lt=dx*ch-dz*sh;const d2=Math.max(4,fw*fw+lt*lt);const kap=2*lt/d2;
   const beta=Math.atan2(c.vy,Math.max(Math.abs(c.vx),5));
   let delta=Math.atan(PHYS.L*kap)+0.05*(v*kap-c.r)+beta*0.9;
-  if(r.aiD<60)delta+=Math.sin(r.t*1.3+c.noise)*0.004*(60-r.aiD)/60;
+  if(r.aiD<60&&!c.isPlayer)delta+=Math.sin(r.t*1.3+(c.noise||0))*0.004*(60-r.aiD)/60;
   c.delta+=clamp(clamp(delta,-PHYS.maxSteer*1.05,PHYS.maxSteer*1.05)-c.delta,-3*dt,3*dt);
   // speed
   let vt=1e9;const look=Math.round((4+v*0.3)/t.sp);for(let k=0;k<=look;k+=2)vt=Math.min(vt,t.vp[(i+k)%N]);
@@ -3141,7 +3192,7 @@ function aiControl(c,dt){
   if(r.sc){let ds=r.sc.s-c.s;if(ds<-t.L/2)ds+=t.L;if(ds>t.L/2)ds-=t.L;vt=ds>0&&ds<260?Math.min(vt,r.sc.v+(ds-25)*0.4):Math.min(vt,46);}
   if(!r.started){c.throttle=0.3;c.brake=1;return;}
   if(c.finished&&r.t-c.finishTime>2)vt=Math.min(vt,45);
-  const err=vt-v;
+  const err=vt-v;if(c.finished){c.throttle=clamp(0.18+err*0.05,0,0.4);c.brake=err<-4?0.2:0;return;}
   const sharp=r.aiD>=100?(r.aiD>=115?2:1.4):1;if(err>0){c.throttle=clamp(0.4+err*0.35*sharp,0,1);c.brake=0;}else if(err>-1.2/sharp){c.throttle=0.1;c.brake=0;}else{c.throttle=0;c.brake=clamp(-err*0.45*sharp,0,1);}
   // ERS
   const gap=intervalAhead(c);
@@ -3210,6 +3261,8 @@ function updateCarVisuals(dt){
 const camPos=new THREE.Vector3(),camLook=new THREE.Vector3();let camHead=0,shakeT=0,lookYaw=0,tvCam=null,camYawOn=0,camYOn=0;
 let onboardWorld=false;
 function updateCamera(dt){tunnelLight();updateSceneLOD();
+  /* never let the camera get stuck on an invalid value (that shows as a black screen) */
+  if(!isFinite(camera.position.x)||!isFinite(camera.position.y)||!isFinite(camPos.x)||!isFinite(camLook.x)||!isFinite(camYawOn)||!isFinite(camYOn)||!isFinite(camHead)){const c=player;camPos.set(c?c.x:0,(c&&c.y)||2,c?c.z:0);camLook.copy(camPos);camHead=0;camYawOn=c&&isFinite(c.heading)?c.heading:0;camYOn=(c&&c.y)||0;lookYaw=0;camera.position.set(camPos.x,camPos.y+3,camPos.z-6);camera.quaternion.set(0,0,0,1);}
   const c=player;if(!c)return;
   const sh=Math.sin(c.heading),ch=Math.cos(c.heading);
   camHead+=wrapA(c.heading-camHead)*(1-Math.exp(-dt*7));
@@ -3324,7 +3377,7 @@ function radioSpeak(txt,c,kind){if(S.radio==='text'||!window.speechSynthesis)ret
   speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}}let radioEl=null,radioT=0,radioGlobal=0,radioLastPos=0,radioBlockT=0,radioPosT=0;
 function radioLine(kind){const L=RADIO_LINES[kind];const clean=S.radio==='clean';
   return L[Math.floor(Math.random()*L.length)].replace(/\{(FU|[FBSD])\}/g,(m,k)=>RADIO_SW[k][clean?1:0]).replace(/\{N\}/g,String(player?player.num:7)).replace(/\s+([!?.,])/g,'$1').replace(/\s{2,}/g,' ');}
-function radioEvent(kind,c,force){if(!race||!c||c.isPlayer||S.radio==='off'||state!=='race')return;const now=race.t;
+function radioEvent(kind,c,force){if(!race||!c||c.isPlayer||c.remote||S.radio==='off'||state!=='race')return;const now=race.t;
   if(!force&&(now<radioGlobal||now<(c.radioT||0)))return;if(!force&&kind!=='crash'&&Math.random()>(race.aiD>=115?0.85:0.5))return;
   radioGlobal=now+5;c.radioT=now+12;const txt=radioLine(kind);
   if(!radioEl){radioEl=document.createElement('div');radioEl.id='radio';radioEl.style.cssText='position:absolute;left:50%;bottom:20%;transform:translateX(-50%);max-width:min(560px,90vw);background:rgba(10,12,18,.82);border-left:5px solid #ff3b30;border-radius:8px;padding:8px 14px;font-family:"Exo 2",system-ui;color:#fff;opacity:0;transition:opacity .25s;pointer-events:none;z-index:5';$('hud').appendChild(radioEl);}
@@ -3476,6 +3529,7 @@ function goBack(){
   else if(curScreen==='career'){if(!CAREER&&CAREER_PICK){CAREER_PICK=null;buildCareer();}else showScreen('main');}
   else if(curScreen==='road'&&ROAD_PREP){ROAD_PREP=null;buildRoad();}
   else if(curScreen==='drift'){showScreen('main');}
+  else if(curScreen==='mp'){mpBackKey();}
   else if(curScreen==='setup'||curScreen==='controls'||curScreen==='road'){showScreen('main');}
   else if(curScreen==='pause'){resume();}
   else if(curScreen==='results'){quitToMenu();}
@@ -3490,6 +3544,15 @@ function makeRow(def,onChange){
   row.onclick=()=>row.change(1);
   row.onmouseenter=()=>{const f=focusables();const i=f.indexOf(row);if(i>=0){focusIdx=i;updateFocus();}};
   render();return row;}
+/* block pinch-zoom (iOS ignores user-scalable=no) and double-tap zoom */
+['gesturestart','gesturechange','gestureend'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault(),{passive:false}));
+document.addEventListener('touchmove',e=>{if(e.touches&&e.touches.length>1)e.preventDefault();},{passive:false});
+{let lastT=0;document.addEventListener('touchend',e=>{const n=Date.now();if(n-lastT<320&&!(e.target&&e.target.tagName==='INPUT'))e.preventDefault();lastT=n;},{passive:false});}
+/* iPhone Safari can't go fullscreen from a web page: tell the player to use Add to Home Screen (opens fullscreen like an app) */
+(function(){const ios=/iPhone|iPod/.test(navigator.userAgent)||(/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>1&&screen.width<900);const standalone=navigator.standalone||matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches;
+  if(ios&&!standalone){const t=document.createElement('div');t.id='iosTip';t.innerHTML='For fullscreen on iPhone: tap <b>Share</b> then <b>Add to Home Screen</b>, and open Apex GP from your home screen.';document.body.appendChild(t);t.style.display='block';t.onclick=()=>t.remove();setTimeout(()=>{try{t.remove();}catch(e){}},14000);}})();
+/* phones: tapping puts the game back into fullscreen (hides the browser bars above the screen) */
+document.addEventListener('touchend',()=>{try{if(isTouch&&!document.fullscreenElement&&!document.webkitFullscreenElement&&state!=='splash')goFullscreen();}catch(e){}},{passive:true});
 /* ---- installing and saving ---- */
 function exportSave(){try{const data={game:'Apex Grand Prix',saved:new Date().toISOString(),keys:{}};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(/^apexgp/i.test(k))data.keys[k]=localStorage.getItem(k);}
   const blob=new Blob([JSON.stringify(data,null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ApexGP-save-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);showMsg('PROGRESS SAVED<small>'+a.download+'</small>',2.5,true);}catch(e){showMsg('Could not save: '+e.message,2.5,true);}}
@@ -3534,6 +3597,7 @@ function onSetting(k){
 }
 document.querySelectorAll('[data-act]').forEach(el=>{el.onmouseenter=()=>{const f=focusables();const i=f.indexOf(el);if(i>=0){focusIdx=i;updateFocus();}};
   el.onclick=()=>{const a=el.dataset.act;
+    if(MP.resultsActive&&state==='results'&&(a==='careerNext'||a==='restart'||a==='quit')){if(a==='careerNext')mpToLobby();else if(a==='restart')mpRematch();else{mpUnhookResults();mpQuitRace();}return;}
     if(a==='race'){S.mode='gp';buildSetup();showScreen('setup');}
     else if(a==='tt'){S.mode='tt';buildSetup();showScreen('setup');}
     else if(a==='settings'){settingsReturn=state==='paused'?'pause':'main';openSettings();}
@@ -3543,6 +3607,7 @@ document.querySelectorAll('[data-act]').forEach(el=>{el.onmouseenter=()=>{const 
     else if(a==='career'){CAREER_PICK=null;showScreen('career');buildCareer();}
     else if(a==='road'){openRoad('events');}
     else if(a==='drift'){openDrift();}
+    else if(a==='mp'){mpOpen();}
     else if(a==='careerNext'&&DRIFT_LAST){driftBack();}
     else if(a==='careerNext'&&ROAD_LAST){roadBack();}
     else if(a==='careerNext'){if(CAREER&&!CAREER.done&&(CAREER.moto||1)>1)startCareerRace();else quitToMenu();}
@@ -3556,7 +3621,7 @@ document.querySelectorAll('[data-act]').forEach(el=>{el.onmouseenter=()=>{const 
 const _goBack=goBack;
 function openPause(){if(state!=='race')return;state='paused';$('pauseSub').textContent=race.mode==='tt'?'TIME TRIAL · '+TRACKS[race.trackIdx].name:'LAP '+clamp(player.lap+1,1,race.laps)+' / '+race.laps+' · P'+player.pos+' · '+TRACKS[race.trackIdx].name;showScreen('pause');if(audioReady)AU.ctx.suspend();}
 function resume(){state='race';showScreen(null);hudApply();if(audioReady)AU.ctx.resume();last=performance.now();}
-function quitToMenu(){if(race&&race.drift&&race.drift.event){driftBack();return;}if(race&&race.road){roadBack();return;}const wasCareer=race&&race.career;if(race&&race.restore)S.weather=race.restore.weather;state='menu';if(audioReady)AU.ctx.resume();race=null;for(const c of cars)scene.remove(c.mesh.root);cars=[];player=null;$('hud').classList.remove('on');$('lights').classList.remove('on');applyTOD();
+function quitToMenu(){if(race&&race.mp){mpQuitRace();return;}if(race&&race.drift&&race.drift.event){driftBack();return;}if(race&&race.road){roadBack();return;}const wasCareer=race&&race.career;if(race&&race.restore)S.weather=race.restore.weather;state='menu';if(audioReady)AU.ctx.resume();race=null;for(const c of cars)scene.remove(c.mesh.root);cars=[];player=null;$('hud').classList.remove('on');$('lights').classList.remove('on');applyTOD();
   if(wasCareer){CAREER_PICK=null;showScreen('career');buildCareer();}else showScreen('main');showMenuCars();}
 /* ===================== ROAD TO APEX GP (career, phase 1) =====================
    Start in a rental kart, earn licences (5 graded tests each), race events for prize money, buy better cars.
@@ -3744,7 +3809,120 @@ function driftResults(){state='results';$('hud').classList.remove('on');if(DHUD)
   $('resTable').innerHTML='<tr><th>Medal</th><th>Target</th><th></th></tr>'+row('Gold',tg.gold.toLocaleString(),grade==='gold')+row('Silver',tg.silver.toLocaleString(),grade==='silver')+row('Bronze',tg.bronze.toLocaleString(),grade==='bronze')+`<tr><td><b>Your score</b></td><td><b>${sc.toLocaleString()}</b></td><td></td></tr>`;
   $('btnCareer').style.display='';$('btnCareer').textContent='Back to Drift Career';$('btnRestart').textContent='Try Again';showScreen('results');focusIdx=0;updateFocus();}
 function driftBack(){DRIFT_LAST=null;if(race)race.drift=null;if(DHUD)DHUD.style.display='none';quitToMenu();if(DRIFT&&DRIFT.restore){S.timeOfDay=DRIFT.restore.timeOfDay;S.weather=DRIFT.restore.weather;DRIFT.restore=null;saveDrift();applyTOD();}openDrift();}
+/* ===================== ONLINE MULTIPLAYER (2 players) =====================
+   WebRTC peer-to-peer via PeerJS (free public broker only for the handshake, then the two devices talk directly).
+   Host creates a room code; guest joins with it. Each game simulates its own car and sends its state 20x a second;
+   the other car is a "remote" car drawn ~0.12 s behind real time and interpolated, so lag never makes it jump. */
+const MP={peer:null,conn:null,role:null,code:'',name:'',opp:null,ready:false,oppReady:false,view:'home',status:'',cfg:null,rtt:120,snaps:[],lastSend:0,inRace:false,leaving:false,retryT:null,local:false,bc:null,result:null,rematchReq:false,oppLeft:false};
+const MP_CLASSES=[['f1','Open Wheel GP'],['touring','GT3'],['street','Street Turbo'],['kart','Go-Kart (2-stroke)'],['kart4','Go-Kart (4-stroke)']];
+function mpLoadPeer(){return new Promise((res,rej)=>{if(window.Peer)return res();const sc=document.createElement('script');sc.src='https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';sc.onload=()=>res();sc.onerror=()=>rej(new Error('Could not load the multiplayer library (are you online?)'));document.head.appendChild(sc);});}
+function mpCodeGen(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let c='';for(let i=0;i<5;i++)c+=A[Math.floor(Math.random()*A.length)];return c;}
+function mpSend(o){try{if(MP.local){window.parent.postMessage({apexmp:1,from:MP.role,msg:o},'*');return;}if(MP.conn&&MP.conn.open)MP.conn.send(o);}catch(e){}}
+window.addEventListener('message',e=>{const d=e.data;if(MP.local&&d&&d.apexmp&&d.from!==MP.role)mpOnMsg(d.msg);});
+function mpSetStatus(t){MP.status=t;const el=document.getElementById('mpStatus');if(el)el.textContent=t;}
+function mpOpen(){if(!MP.name)MP.name=(S.mpName||'Player');showScreen('mp');mpBuild();}
+function mpBackKey(){if(MP.view==='lobby')mpLeave();else showScreen('main');}
+function mpDefaultCfg(){const c=effCls();const cls=MP_CLASSES.find(x=>x[0]===c)?c:'f1';let tr=S.track;const want=isKart(cls);if(!TRACKS[tr]||!!TRACKS[tr].kart!==want||TRACKS[tr].drift)tr=TRACKS.findIndex(t=>!!t.kart===want&&!t.drift);return{track:tr,cls,laps:Math.min(10,Math.max(1,S.laps||3))};}
+function mpBuild(){const body=$('mpBody');if(!body)return;body.innerHTML='';
+  const hover=d=>{d.onmouseenter=()=>{const f=focusables();const i=f.indexOf(d);if(i>=0){focusIdx=i;updateFocus();}};};
+  const btn=(html,fn,dim)=>{const d=document.createElement('div');d.className='menu-btn fc';d.innerHTML=html;d.style.fontSize='19px';if(dim)d.style.opacity='0.45';d.onclick=dim?()=>{}:fn;hover(d);body.appendChild(d);return d;};
+  const note=h=>{const d=document.createElement('div');d.className='desc';d.style.margin='4px 0 8px';d.innerHTML=h;body.appendChild(d);return d;};
+  const input=(ph,val,max)=>{const i=document.createElement('input');i.placeholder=ph;i.value=val||'';i.maxLength=max||16;i.style.cssText='font:700 20px "Exo 2",system-ui;padding:10px 14px;margin:6px 0;width:min(420px,90%);background:rgba(0,0,0,.45);color:#fff;border:2px solid rgba(255,255,255,.25);border-radius:6px;text-transform:'+(max===5?'uppercase':'none');i.onkeydown=e=>e.stopPropagation();body.appendChild(i);return i;};
+  const st=document.createElement('div');st.id='mpStatus';st.className='desc';st.style.cssText='margin:8px 0;color:#ffcc00;font-weight:700';st.textContent=MP.status||'';
+  if(MP.view==='home'){$('mpSub').textContent='RACE A FRIEND ONLINE · COMPUTER OR PHONE';
+    note('Your name:');const ni=input('Your name',MP.name,14);ni.onchange=()=>{MP.name=ni.value.trim()||'Player';S.mpName=MP.name;saveS();};
+    btn('Create race<small>You get a room code to send to your friend. You choose the track, car and laps.</small>',()=>{MP.name=ni.value.trim()||'Player';S.mpName=MP.name;saveS();mpHost();});
+    note('Have a code? Type it here:');const ci=input('Room code',MP.code&&MP.role!=='host'?MP.code:'',5);
+    btn('Join race<small>Join your friend with their room code.</small>',()=>{MP.name=ni.value.trim()||'Player';S.mpName=MP.name;saveS();const c=ci.value.trim().toUpperCase();if(c.length<4){mpSetStatus('Type the room code first.');return;}mpJoin(c);});
+    body.appendChild(st);btn('Back',()=>showScreen('main'));}
+  else{const host=MP.role==='host';const cfg=MP.cfg||mpDefaultCfg();$('mpSub').textContent='ROOM CODE: '+MP.code+(host?'  ·  SEND THIS TO YOUR FRIEND':'');
+    const big=note(`<div style="font:900 italic 46px 'Exo 2';letter-spacing:.18em;color:#fff">${MP.code}</div>`);
+    const pl=[{n:MP.name+' (you)',r:MP.ready,h:host},MP.opp?{n:MP.opp,r:MP.oppReady,h:!host}:null];
+    note('<b>PLAYERS</b><br>'+pl.map(x=>x?`${x.r?'✅':'⏳'} ${x.n}${x.h?' · host':''}${x.r?' · READY':''}`:'⌛ Waiting for a friend to join…').join('<br>'));
+    const cn=(MP_CLASSES.find(x=>x[0]===cfg.cls)||[0,cfg.cls])[1];
+    note(`<b>RACE</b><br>${TRACKS[cfg.track].name} · ${cn} · ${cfg.laps} laps`);
+    if(host){const opts=TRACKS.map((t,i)=>i).filter(i=>!TRACKS[i].drift&&!!TRACKS[i].kart===isKart(cfg.cls));
+      btn('Track: '+TRACKS[cfg.track].name+'<small>Click to change</small>',()=>{const k=opts.indexOf(cfg.track);cfg.track=opts[(k+1)%opts.length];mpLobbyChanged();});
+      btn('Car: '+cn+'<small>Click to change</small>',()=>{const k=MP_CLASSES.findIndex(x=>x[0]===cfg.cls);cfg.cls=MP_CLASSES[(k+1)%MP_CLASSES.length][0];const want=isKart(cfg.cls);if(!!TRACKS[cfg.track].kart!==want)cfg.track=TRACKS.findIndex(t=>!!t.kart===want&&!t.drift);mpLobbyChanged();});
+      btn('Laps: '+cfg.laps+'<small>Click to change</small>',()=>{cfg.laps=cfg.laps>=10?1:cfg.laps+1;mpLobbyChanged();});}
+    btn(MP.ready?'✓ Ready (click to cancel)':'Ready',()=>{MP.ready=!MP.ready;mpSend({t:'ready',v:MP.ready});mpLobbyChanged(true);});
+    if(host)btn('▶ Start race'+(MP.opp&&MP.ready&&MP.oppReady?'':'<small>Both players must be ready</small>'),()=>mpStartRace(),!(MP.opp&&MP.ready&&MP.oppReady));
+    body.appendChild(st);btn('Leave',()=>mpLeave());}
+  focusIdx=0;updateFocus();}
+function mpLobbyChanged(local){if(MP.role==='host'){if(!MP.cfg)MP.cfg=mpDefaultCfg();mpSend({t:'lobby',cfg:MP.cfg,hostName:MP.name,hostReady:MP.ready,guestReady:MP.oppReady});}if(curScreen==='mp')mpBuild();}
+function mpWire(conn){MP.conn=conn;conn.on('data',d=>mpOnMsg(d));conn.on('close',()=>mpOnClose());conn.on('error',()=>mpOnClose());}
+async function mpHost(){mpReset();MP.role='host';MP.code=mpCodeGen();MP.cfg=mpDefaultCfg();MP.view='lobby';mpSetStatus('Creating room…');mpBuild();
+  if(MP.local){mpSetStatus('Room ready (local test). Waiting for a friend…');return;}
+  try{await mpLoadPeer();}catch(e){mpSetStatus(e.message);return;}
+  MP.peer=new Peer('apexgp-'+MP.code);
+  MP.peer.on('open',()=>mpSetStatus('Room ready. Send the code to your friend.'));
+  MP.peer.on('connection',c=>{if(MP.conn&&MP.conn.open&&MP.conn!==c){c.on('open',()=>{c.send({t:'full'});setTimeout(()=>c.close(),300);});return;}c.on('open',()=>{mpWire(c);});});
+  MP.peer.on('disconnected',()=>{if(!MP.leaving)try{MP.peer.reconnect();}catch(e){}});
+  MP.peer.on('error',e=>{if(e.type==='unavailable-id'){MP.code=mpCodeGen();mpSetStatus('Code taken, trying another…');try{MP.peer.destroy();}catch(_){}mpHost();}else mpSetStatus('Connection problem: '+e.type);});}
+async function mpJoin(code){mpReset();MP.role='guest';MP.code=code;MP.view='lobby';mpSetStatus('Connecting to '+code+'…');mpBuild();
+  if(MP.local){mpSend({t:'hello',name:MP.name});return;}
+  try{await mpLoadPeer();}catch(e){mpSetStatus(e.message);return;}
+  MP.peer=new Peer();MP.peer.on('open',()=>mpConnectGuest());MP.peer.on('disconnected',()=>{if(!MP.leaving)try{MP.peer.reconnect();}catch(e){}});
+  MP.peer.on('error',e=>{if(e.type==='peer-unavailable'){if(MP.reconnecting)return;mpSetStatus('Room '+MP.code+' not found. Check the code (the host must keep the game open).');}else mpSetStatus('Connection problem: '+e.type);});}
+function mpConnectGuest(){if(!MP.peer||MP.leaving)return;const c=MP.peer.connect('apexgp-'+MP.code,{reliable:true,metadata:{name:MP.name}});c.on('open',()=>{mpWire(c);MP.reconnecting=false;mpSend({t:'hello',name:MP.name,inRace:MP.inRace});mpSetStatus('Connected!');});}
+function mpReset(){MP.leaving=false;MP.opp=null;MP.ready=false;MP.oppReady=false;MP.snaps=[];MP.inRace=false;MP.result=null;MP.rematchReq=false;MP.oppLeft=false;MP.reconnecting=false;clearInterval(MP.retryT);MP.retryT=null;MP.pingT&&clearInterval(MP.pingT);
+  MP.pingT=setInterval(()=>mpSend({t:'ping',at:performance.now()}),2000);}
+function mpLeave(){MP.leaving=true;mpSend({t:'bye'});setTimeout(()=>{try{MP.conn&&MP.conn.close();}catch(e){}try{MP.peer&&MP.peer.destroy();}catch(e){}try{MP.bc&&MP.bc.close();}catch(e){}MP.conn=null;MP.peer=null;MP.bc=null;},150);clearInterval(MP.pingT);clearInterval(MP.retryT);MP.view='home';MP.role=null;mpSetStatus('');if(state==='race'||state==='paused'||state==='results'){MP.inRace=false;if(race)race.mp=false;quitToMenu();}mpOpen();}
+function mpOnClose(){if(MP.leaving)return;MP.conn=null;
+  if(MP.role==='guest'){mpSetStatus('Connection lost — reconnecting…');MP.reconnecting=true;let tries=0;clearInterval(MP.retryT);MP.retryT=setInterval(()=>{if(MP.conn&&MP.conn.open){clearInterval(MP.retryT);return;}if(++tries>30){clearInterval(MP.retryT);mpSetStatus('Could not reconnect to the host.');MP.oppLeft=true;return;}try{if(MP.peer&&MP.peer.disconnected)MP.peer.reconnect();mpConnectGuest();}catch(e){}},2500);}
+  else{mpSetStatus((MP.opp||'Your friend')+' disconnected — waiting for them to come back…');MP.oppReady=false;if(curScreen==='mp')mpBuild();}
+  if(state==='race')showMsg('OPPONENT DISCONNECTED<small>Waiting for them to reconnect…</small>',3,true,'#ffcc00');}
+function mpOnMsg(m){if(!m||!m.t)return;
+  switch(m.t){
+    case 'hello':if(MP.role!=='host')break;MP.opp=m.name||'Guest';mpSetStatus(MP.opp+' joined!');if(MP.inRace&&race&&race.mp){mpSend({t:'resume',cfg:MP.cfg,hostName:MP.name});}mpLobbyChanged();break;
+    case 'lobby':if(MP.role!=='guest')break;MP.cfg=m.cfg;MP.opp=m.hostName;MP.oppReady=m.hostReady;if(curScreen==='mp')mpBuild();break;
+    case 'ready':MP.oppReady=!!m.v;mpLobbyChanged();break;
+    case 'full':mpSetStatus('That room already has two players.');break;
+    case 'ping':mpSend({t:'pong',at:m.at});break;
+    case 'pong':MP.rtt=MP.rtt*0.7+(performance.now()-m.at)*0.3;break;
+    case 'start':if(MP.role==='guest'){MP.cfg=m.cfg;mpBeginRace(m.cfg,m.seed);}break;
+    case 'st':m._at=performance.now();MP.snaps.push(m);if(MP.snaps.length>40)MP.snaps.shift();MP.lastRecv=performance.now();break;
+    case 'resume':mpSetStatus('Reconnected.');if(state==='race')showMsg('OPPONENT RECONNECTED',1.6,true,'#2bff5a');break;
+    case 'rematch':MP.rematchReq=true;if(MP.role==='host'){mpSetStatus(MP.opp+' wants a rematch!');if(state==='results')mpResultsButtons();}break;
+    case 'toLobby':mpToLobby(true);break;
+    case 'bye':MP.oppLeft=true;mpSetStatus((MP.opp||'Your friend')+' left the room.');MP.oppReady=false;if(MP.role==='host'){MP.opp=null;}if(state==='race')showMsg('OPPONENT LEFT THE RACE',3,true,'#ff5a4f');if(curScreen==='mp')mpBuild();break;}}
+function mpStartRace(){if(MP.role!=='host'||!MP.opp||!MP.ready||!MP.oppReady)return;const seed=Math.floor(Math.random()*1e9);const cfg=MP.cfg;mpSend({t:'start',cfg,seed});
+  const delay=Math.min(400,Math.max(0,MP.rtt/2));setTimeout(()=>mpBeginRace(cfg,seed),delay);}
+function mpBeginRace(cfg,seed){MP.inRace=true;MP.snaps=[];MP.result=null;MP.rematchReq=false;MP.ready=false;MP.oppReady=false;
+  startRace({track:cfg.track,cls:cfg.cls,laps:cfg.laps,aiCount:1,grid:MP.role==='host'?'pole':'back',mode:'gp',seed,mp:true,weather:'dry'});}
+function mpSetupRace(cfg){const rc=cars.find(c=>!c.isPlayer);if(!rc)return;rc.remote=true;rc.rival=true;rc.name=MP.opp||'Opponent';rc.code=(rc.name.replace(/[^A-Za-z]/g,'').slice(0,3)||'OPP').toUpperCase();
+  player.name=MP.name||'You';race.rival=rc;MP.remote=rc;showMsg('ONLINE RACE<small>vs '+rc.name+'</small>',2.5,true);}
+function mpTick(r,dt){MP.sendAcc=(MP.sendAcc||0)+dt;if(MP.sendAcc<0.05)return;MP.sendAcc=0;mpSendState(r);}
+function mpSendState(r){const p=player;if(!p||!r)return;
+  mpSend({t:'st',rt:r.t,st:r.started?1:0,x:+p.x.toFixed(3),y:+(p.y||0).toFixed(3),z:+p.z.toFixed(3),h:+p.heading.toFixed(4),vx:+p.vx.toFixed(3),vy:+p.vy.toFixed(3),d:+p.delta.toFixed(3),s:+p.s.toFixed(2),lap:p.lap,fin:p.finished?1:0,ft:p.finished?p.finishTime:0,pen:p.penalty||0,thr:+(p.throttle||0).toFixed(2),rpm:Math.round(p.rpm||0),g:p.gear});}
+function mpRemoteTick(c,dt){const S_=MP.snaps;if(!S_.length){c.vx=0;c.vy=0;return;}const r=race;const now=performance.now(),target=now-120;const last=S_[S_.length-1];
+  /* render ~120 ms behind arrival time (jitter buffer): independent of either player's race clock */
+  let a=null,b=null;for(let i=S_.length-1;i>=0;i--){if(S_[i]._at<=target){a=S_[i];b=S_[i+1]||null;break;}}if(!a){a=S_[0];b=null;}
+  let x=a.x,y=a.y,z=a.z,h=a.h,vx=a.vx,vy=a.vy;
+  if(b&&b._at>a._at){const u=clamp((target-a._at)/(b._at-a._at),0,1);x=lerp(a.x,b.x,u);y=lerp(a.y,b.y,u);z=lerp(a.z,b.z,u);h=a.h+wrapA(b.h-a.h)*u;vx=lerp(a.vx,b.vx,u);vy=lerp(a.vy,b.vy,u);}
+  else{const ex=Math.min(0.5,Math.max(0,(target-a._at)/1000));const sh=Math.sin(a.h),ch=Math.cos(a.h);x+= (sh*a.vx+ch*a.vy)*ex;z+=(ch*a.vx-sh*a.vy)*ex;}
+  c.x=x;c.y=y;c.z=z;c.heading=h;c.vx=vx;c.vy=vy;c.delta=a.d;c.throttle=a.thr;c.rpm=a.rpm||c.rpm;c.gear=a.g||1;c.air=false;
+  c.idx=projectIdx(c.x,c.z,c.idx>=0?c.idx:-1);c.s=a.s;c.lap=a.lap;c.penalty=last.pen||0;if(last.fin&&last.lap>c.lap){c.lap=last.lap;}
+  if(last.fin&&!c.finished){c.finished=true;c.finishTime=last.ft;let k=r.finishOrder.length;while(k>0&&r.finishOrder[k-1].finishTime>c.finishTime)k--;r.finishOrder.splice(k,0,c);showMsg((c.name||'Opponent').toUpperCase()+' FINISHED',2,true);}
+  const stale=performance.now()-(MP.lastRecv||0)>3000;c.mesh.root.traverse(o=>{if(o.isMesh&&o.material&&o.material.opacity!==undefined){}});c.mesh.root.visible=!stale||Math.floor(performance.now()/300)%2===0;}
+function mpResults(){try{mpSendState(race);mpSendState(race);}catch(e){}state='results';$('hud').classList.remove('on');const r=race,me=player,op=MP.remote;
+  const fo=r.finishOrder.slice();const meT=me.finished?me.finishTime:null,opT=op&&op.finished?op.finishTime:null;
+  let winner=fo[0]||(meT!=null?me:null);const meWon=winner===me;
+  $('resTitle').textContent=meWon?'YOU WIN!':(winner?(winner.name||'Opponent')+' WINS':'Race over');
+  $('resSub').textContent='ONLINE RACE · '+TRACKS[r.trackIdx].name+' · '+r.laps+' LAPS'+(MP.oppLeft?' · OPPONENT LEFT':'');
+  const row=(c,t,pos)=>`<tr${c===me?' class="me"':''}><td>${pos}</td><td>${c===me?(MP.name||'You')+' (you)':(c?c.name:'Opponent')}</td><td>${t!=null?fmtT(t):'did not finish'}</td><td>${c&&c.penalty?'+'+c.penalty+' s pen.':''}</td></tr>`;
+  const list=[[me,meT],[op,opT]].sort((A,B)=>(A[1]==null)-(B[1]==null)||(A[1]-B[1]));
+  $('resTable').innerHTML='<tr><th>Pos</th><th>Driver</th><th>Time</th><th></th></tr>'+list.map((x,i)=>row(x[0],x[1],i+1)).join('');
+  MP.result={meWon};showScreen('results');mpResultsButtons();}
+function mpResultsButtons(){const bc=$('btnCareer'),br=$('btnRestart');bc.style.display='';bc.textContent='Back to Lobby';br.textContent=MP.role==='host'?(MP.rematchReq?'Rematch! (friend is waiting)':'Rematch'):(MP.rematchReq?'Rematch requested…':'Ask for Rematch');
+  MP.resultsActive=true;focusIdx=0;updateFocus();}
+function mpRematch(){if(MP.role==='host'){MP.ready=true;MP.oppReady=true;const seed=Math.floor(Math.random()*1e9);mpSend({t:'start',cfg:MP.cfg,seed});const delay=Math.min(400,Math.max(0,MP.rtt/2));mpUnhookResults();setTimeout(()=>mpBeginRace(MP.cfg,seed),delay);}
+  else{MP.rematchReq=true;mpSend({t:'rematch'});mpResultsButtons();mpSetStatus('Asked the host for a rematch…');}}
+function mpUnhookResults(){MP.resultsActive=false;}
+function mpToLobby(fromOpp){mpUnhookResults();if(!fromOpp)mpSend({t:'toLobby'});MP.inRace=false;MP.ready=false;MP.oppReady=false;if(race)race.mp=false;if(state!=='menu')quitToMenu();MP.view='lobby';showScreen('mp');mpLobbyChanged();}
+function mpQuitRace(){mpSend({t:'bye'});MP.inRace=false;race.mp=false;mpUnhookResults();quitToMenu();MP.leaving=true;try{MP.conn&&MP.conn.close();MP.peer&&MP.peer.destroy();MP.bc&&MP.bc.close();}catch(e){}MP.view='home';MP.role=null;mpOpen();}
 function showResults(){
+  if(race&&race.mp){mpResults();return;}
   if(race&&race.drift){driftResults();return;}
   if(race&&race.road){roadResults();return;}
   $('btnCareer').textContent='Continue Career';$('btnRestart').textContent='Race Again';
@@ -3898,7 +4076,7 @@ async function boot(){
   if('serviceWorker' in navigator&&location.protocol==='https:'&&location.hostname!=='appassets.androidplatform.net')navigator.serviceWorker.register('sw.js').catch(()=>{});
   window.__appBack=()=>{if(state==='race')openPause();else if(state!=='splash')menuAction('back');};
   window.__appPause=()=>{if(state==='race')openPause();};
-  window.__game={get MAT(){return MAT;},get AU(){return AU;},get REC(){return REC;},damageCar,deploySC,unlockAudio,updateAudio,get TR(){return TR;},get cars(){return cars;},get race(){return race;},S,startRace,step(n,dt=1/60){for(let i=0;i<n&&state==='race';i++){pollInput(dt);updateRace(dt);}updateCarVisuals(0);updateCamera(1);updateRacingLine();renderFrame();updateHUD(0.016);},setCam(m){camMode=m;},get scene(){return scene;},THREE,TRACKS,renderer,trackGroup,turtleTrack,get PHYS(){return PHYS;},get CAREER(){return CAREER;},get player(){return player;},get ROAD(){return ROAD;},set ROAD(v){ROAD=v;},get ROAD_EVENTS(){return ROAD_EVENTS;},openRoad,roadStartTest,roadStartEvent,roadResults,roadBack,get state(){return state;},radioEvent,get SC(){return SC;},get VOICES(){return VOICES;},heightAt,bankY,openDrift,driftStart,get DRIFT_EVENTS(){return DRIFT_EVENTS;},get DRIFT(){return DRIFT;},set DRIFT(v){DRIFT=v;},driftResults};
+  window.__game={get MAT(){return MAT;},get AU(){return AU;},get REC(){return REC;},damageCar,deploySC,unlockAudio,updateAudio,get TR(){return TR;},get cars(){return cars;},get race(){return race;},S,startRace,step(n,dt=1/60){for(let i=0;i<n&&state==='race';i++){pollInput(dt);updateRace(dt);}updateCarVisuals(0);updateCamera(1);updateRacingLine();renderFrame();updateHUD(0.016);},setCam(m){camMode=m;},get scene(){return scene;},THREE,TRACKS,renderer,trackGroup,turtleTrack,get PHYS(){return PHYS;},get CAREER(){return CAREER;},get player(){return player;},get ROAD(){return ROAD;},set ROAD(v){ROAD=v;},get ROAD_EVENTS(){return ROAD_EVENTS;},openRoad,roadStartTest,roadStartEvent,roadResults,roadBack,get state(){return state;},radioEvent,get SC(){return SC;},get VOICES(){return VOICES;},heightAt,bankY,MP,mpHost,mpJoin,mpStartRace,mpOpen,mpRematch,mpToLobby,openDrift,driftStart,get DRIFT_EVENTS(){return DRIFT_EVENTS;},get DRIFT(){return DRIFT;},set DRIFT(v){DRIFT=v;},driftResults};
 }
 boot();
 </script>

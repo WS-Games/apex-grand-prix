@@ -29,6 +29,29 @@ Open-wheelers, V8 touring cars, turbo street cars and go-karts. Nine tracks (inc
 
 Plug in an **Xbox or PlayStation controller** at any time — it's picked up automatically (with vibration).
 
+## 🆕 New in v1.8: Online multiplayer
+
+Race a friend over the internet, on computers, phones, or one of each.
+
+**How to play online**
+1. Both players open the game (the website or the Android app) and choose **Multiplayer** on the main menu.
+2. Player 1 types a name and clicks **Create race**. A 5-letter **room code** appears. Send it to your friend.
+3. Player 1 picks the **track**, **car** and **laps**.
+4. Player 2 types a name and the code, then clicks **Join race**.
+5. Both players click **Ready**, then Player 1 clicks **Start race**.
+6. At the end you'll see who won and both finishing times. Choose **Rematch**, **Back to Lobby** or **Main Menu**.
+
+Your opponent appears on track with their name above the car, and the live leaderboard shows both of you. If someone's connection drops, the game reconnects automatically while the host keeps the room open. The host has to keep the game open for the guest to join.
+
+**Also in v1.8**
+- A 90s drift-style cockpit for the Supra and S14: coloured roll cage, bucket seat with harness, a row of gauges, a gold shift knob and a 90s dashboard.
+- The Japanese street cars steer more easily.
+- The 2-stroke kart sounds rougher, like a real 2-stroke.
+- No more siren-like engine sound after the finish.
+- Fixed a black screen at the end of races on Easy.
+- Phones: bigger menus and HUD, tap to go fullscreen, and no accidental zooming. On iPhone, use **Share → Add to Home Screen** to play fullscreen.
+- Copyright notice added (see COPYRIGHT.txt).
+
 ## 🆕 New in v1.7.1
 
 - **Steering fixed on every car**: less understeer, and more steering lock for hairpins and the kart spiral.
@@ -251,3 +274,7 @@ docs/screenshots/       images used in this README
 - Roadside buildings on the Ballarat Highway Circuit: ["Low-poly City Buildings"](https://skfb.ly/oMrLu) by **smooth998**, licensed [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/).
 - None of the car or building models are affiliated with or endorsed by any manufacturer or brand.
 - Everything else (the other cars, tracks, textures, music, other sounds, sponsor names) is generated in code.
+
+## © Copyright
+
+© 2026 **WS Games**. All rights reserved. You may play Apex Grand Prix for free, but you may not copy, redistribute or sell the game without permission. Third-party models and sounds keep their own CC BY licences (see Credits). Details in [COPYRIGHT.txt](COPYRIGHT.txt).

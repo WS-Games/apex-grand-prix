@@ -1,0 +1,21 @@
+Apex Grand Prix
+Copyright (c) 2026 WS Games. All rights reserved.
+
+The Apex Grand Prix game, its code, track designs, menus, music, sound design and
+original graphics are the property of WS Games. You may play the game for free, but
+you may not copy, redistribute, sell or publish the game, or substantial parts of it,
+without written permission from WS Games.
+
+Third-party assets keep their own licences and remain the work of their creators
+(see the Credits section of README.md):
+- "2026 F1 Car new EVO" by Abu Saif - CC BY 4.0
+- "2026 M4 GT3 EVO" by VTDAT23 - CC BY 4.0
+- "Toyota Supra MK4 (LowPoly)" by Mike Farrant - CC BY 4.0
+- "Nissan Silvia S14" by S.K. - CC BY 4.0
+- "Low-poly City Buildings" by smooth998 - CC BY 4.0
+- "BCR F1 Car 19" by LG (freesound.org) - CC BY 4.0
+- "F1 Crowd Air Horns" by WebbFilmsUK (freesound.org) - CC BY 4.0
+- three.js (MIT licence), PeerJS (MIT licence)
+
+All car, team and sponsor names in the game are fictional. Apex Grand Prix is not
+affiliated with or endorsed by any car manufacturer, racing series or brand.
