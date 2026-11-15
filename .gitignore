@@ -9,3 +9,4 @@ android/build/
 
 # raw processed car models (they ship inside models.js)
 models/
+*.zip

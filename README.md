@@ -26,9 +26,26 @@ Open-wheelers, V8 touring cars, turbo street cars and go-karts. Eight tracks plu
 |---|---|
 | **Browser (PC / Mac / phone)** | Open **[ws-games.github.io/apex-grand-prix](https://ws-games.github.io/apex-grand-prix/)** in Chrome or Edge. On a phone you can tap **⋮ → Add to Home screen** to install it — it then works offline. |
 | **Android app** | Download **[ApexGP.apk](https://github.com/WS-Games/apex-grand-prix/releases/latest/download/ApexGP.apk)**, tap it, and allow installing from your browser / files app when asked. Android 7+, fully offline. |
-| **Windows (local)** | Download the code and double-click `Play Apex GP.bat`. |
+| **Install on PC** | On the website in Chrome or Edge, click **Install on PC** in the main menu (or the install icon in the address bar). It then opens from your Start menu like a normal app and works offline. |
+| **Windows (offline download)** | Download **[ApexGP-Windows.zip](https://github.com/WS-Games/apex-grand-prix/releases/latest/download/ApexGP-Windows.zip)**, unzip it and double-click `Play Apex GP.bat`. No internet needed. |
 
 Plug in an **Xbox or PlayStation controller** at any time — it's picked up automatically (with vibration).
+
+## 🆕 New in v1.6.1
+
+- **Install on PC and save files**: an *Install on PC* button, an offline Windows download, and *Save / Load progress to a file* in Settings.
+- **A rival every race** — the driver starting next to you is out to beat you: harder racing, fewer mistakes, and a **red name tag**.
+- **Driver names over cars** — small tags above nearby cars (toggle in Settings → Gameplay).
+- **Race announcer** — a big banner and voice call overtakes at the front, anything involving you or your rival, and the final lap.
+- **Tougher AI on every level** — all five levels follow your pace a step closer; Death is quicker than you.
+- **Fixes** — no more black screen after winning, GT3 doors are whole with dark race glass, brake and turn at the same time, F1 cockpits are carbon black, a luxury GT3 cockpit with a touchscreen and a digital gauge pod.
+
+| | |
+|---|---|
+| ![Rival and name tags](docs/screenshots/v161-rival-name-tags.png) | ![GT3 side](docs/screenshots/v161-gt3-side.png) |
+| <sub>Your rival (red tag) and driver names</sub> | <sub>GT3: whole doors, race number and sponsor</sub> |
+| ![GT3 cockpit](docs/screenshots/v161-gt3-cockpit.png) | ![F1 cockpit](docs/screenshots/v161-f1-cockpit.png) |
+| <sub>GT3 cockpit with touchscreen and gauge pod</sub> | <sub>F1 cockpit</sub> |
 
 ## 🆕 New in v1.6
 
