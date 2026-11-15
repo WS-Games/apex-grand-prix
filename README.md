@@ -29,6 +29,12 @@ Open-wheelers, V8 touring cars, turbo street cars and go-karts. Nine tracks (inc
 
 Plug in an **Xbox or PlayStation controller** at any time — it's picked up automatically (with vibration).
 
+## 🆕 New in v1.8.1
+
+- **Joystick steering on phones**: put your thumb anywhere on the left side and slide to steer. Brake and Gas are on the right, plus a Drift button in drift races. Change it in Settings → Touch Steering.
+- **Compact landscape HUD on phones**: smaller position board, timing panel, speed panel and start lights, with nothing covering the track.
+- Cockpit fixes: the gold shift knob sits on the stick and the instrument hood sits on the dash.
+
 ## 🆕 New in v1.8: Online multiplayer
 
 Race a friend over the internet, on computers, phones, or one of each.
