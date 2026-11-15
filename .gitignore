@@ -6,3 +6,6 @@ android/build/
 # APK signing key - keep this private and backed up locally, never commit it
 *.keystore
 *.jks
+
+# raw processed car models (they ship inside models.js)
+models/

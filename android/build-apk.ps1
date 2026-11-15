@@ -15,13 +15,16 @@ if (-not (Test-Path "$P\res\mipmap-mdpi\ic_launcher.png")) { & "$P\make-icons.ps
 $html = [IO.File]::ReadAllText("$Game\index.html", [Text.Encoding]::UTF8)
 # (assets are kept flat: aapt2 on Windows writes sub-folder paths with backslashes, which Android can't open)
 $html = $html.Replace('"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"', '"three":"./three.module.js"')
-$html = $html.Replace('"three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"', '"three/addons/utils/BufferGeometryUtils.js":"./BufferGeometryUtils.js"')
+$html = $html.Replace('"three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"', '"three/addons/utils/BufferGeometryUtils.js":"./BufferGeometryUtils.js","three/addons/loaders/GLTFLoader.js":"./GLTFLoader.js"')
 if ($html.Contains('cdn.jsdelivr.net')) { throw 'import map rewrite failed' }
 $html = [regex]::Replace($html, '<link rel="preconnect"[^>]*>\s*', '')
 $html = [regex]::Replace($html, '<link href="https://fonts.googleapis.com[^>]*>\s*', '')
 [IO.File]::WriteAllText("$W\assets\index.html", $html, (New-Object Text.UTF8Encoding($false)))
 Copy-Item "$B\lib\three.module.js","$B\lib\addons\utils\BufferGeometryUtils.js" "$W\assets"
-Copy-Item "$Game\manifest.json","$Game\icon-192.png","$Game\icon-512.png","$Game\sounds.js" "$W\assets" -ErrorAction SilentlyContinue
+Copy-Item "$Game\manifest.json","$Game\icon-192.png","$Game\icon-512.png","$Game\sounds.js","$Game\models.js" "$W\assets" -ErrorAction SilentlyContinue
+# GLTFLoader for the car models, with its import pointed at the flat asset folder
+$gl = [IO.File]::ReadAllText("$B\lib\addons\loaders\GLTFLoader.js").Replace("from '../utils/BufferGeometryUtils.js'", "from './BufferGeometryUtils.js'")
+[IO.File]::WriteAllText("$W\assets\GLTFLoader.js", $gl, (New-Object Text.UTF8Encoding($false)))
 
 # 2. resources + manifest
 Run "$BT\aapt2.exe" @('compile', '--dir', "$P\res", '-o', "$W\res.zip")

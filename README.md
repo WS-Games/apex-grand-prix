@@ -6,7 +6,7 @@
 
 **A 3D motorsport game that runs right in your browser — and on your Android phone.**
 
-Open-wheelers, V8 touring cars, turbo street cars and go-karts. Eight tracks plus three kart circuits with bridges, tunnels and a city circuit, a full career mode, damage, safety cars, pit stops, hills and rain.
+Open-wheelers, V8 touring cars, turbo street cars and go-karts. Eight tracks plus five kart circuits (including a figure-eight with a bridge and an indoor spiral tower) with bridges, tunnels and a city circuit, a full career mode, damage, safety cars, pit stops, hills and rain.
 
 [![Play in browser](https://img.shields.io/badge/%E2%96%B6%20PLAY%20NOW-in%20your%20browser-ff3b30?style=for-the-badge)](https://waynesimpson-spec.github.io/apex-grand-prix/)
 [![Download APK](https://img.shields.io/badge/ANDROID-Download%20APK-3ddc84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/waynesimpson-spec/apex-grand-prix/releases/latest/download/ApexGP.apk)
@@ -29,6 +29,27 @@ Open-wheelers, V8 touring cars, turbo street cars and go-karts. Eight tracks plu
 | **Windows (local)** | Download the code and double-click `Play Apex GP.bat`. |
 
 Plug in an **Xbox or PlayStation controller** at any time — it's picked up automatically (with vibration).
+
+## 🆕 New in v1.6
+
+- **New race cars** — a 2026-style open-wheeler and a GT3 coupe (3D models credited below), each painted in its own livery with a race number and a sponsor logo, so no two cars look the same. Exhaust flames and pops on lift-off and upshifts, biggest on the open-wheelers.
+- **Two new kart tracks** — *Crossover Kart Park*, a figure-eight where the straight dives under a bridge, and *Spiral Tower Indoor Karting*, an indoor arena with a two-turn car-park spiral climbing 8 m.
+- **Death difficulty now adapts to you** — it learns how fast you take corners and races at your pace, so every race is wheel-to-wheel. Tidier AI racing lines, less weaving.
+- **Sponsors in Road to Apex GP** — win or reach the podium and sponsors make offers: pay per race plus bonuses for hitting their targets, with their logo on your car.
+- **Menu previews** — hover over a circuit or a car to see its map or a picture on the right.
+- **Handling** — every class is more planted, with no more sliding out of control.
+- **Fixes** — the safety car no longer floats (and goes in sooner), kart steering wheel faces the driver, tinted race glass on the GT3, indoor lighting.
+
+| | |
+|---|---|
+| ![Open-wheel grid](docs/screenshots/v16-f1-grid.png) | ![GT3 grid](docs/screenshots/v16-gt3-grid.png) |
+| <sub>New open-wheelers: every car has its own livery, number and sponsor</sub> | <sub>New GT3 cars</sub> |
+| ![Bird's-eye view of the grid](docs/screenshots/v16-f1-birdseye.png) | ![Exhaust flames](docs/screenshots/v16-f1-flames.png) |
+| <sub>From above</sub> | <sub>Third person, with exhaust flames</sub> |
+| ![Crossover Kart Park](docs/screenshots/v16-crossover-kart.png) | ![Spiral Tower Indoor Karting](docs/screenshots/v16-spiral-indoor.png) |
+| <sub>Crossover Kart Park: figure-eight over a bridge</sub> | <sub>Spiral Tower Indoor Karting</sub> |
+| ![Menu car preview](docs/screenshots/v16-menu-car-preview.png) | ![Sponsors](docs/screenshots/v16-sponsors.png) |
+| <sub>Hover previews in the menus</sub> | <sub>Sponsors in Road to Apex GP</sub> |
 
 ## 📸 Screenshots
 
@@ -183,4 +204,6 @@ docs/screenshots/       images used in this README
 
 - F1 engine sound: ["BCR F1 Car 19"](https://freesound.org/s/77919/) by **LG**, licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) (trimmed and re-pitched).
 - Crowd sound: ["F1 Crowd Air Horns"](https://freesound.org/s/200809/) by **WebbFilmsUK**, licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) (trimmed).
-- Everything else (cars, tracks, textures, music, other sounds) is generated in code.
+- Open-wheel car model: ["2026 F1 Car new EVO"](https://skfb.ly/pMqnE) by **Abu Saif**, licensed [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/) (reduced in detail, recoloured with in-game liveries, new tyres).
+- GT3 car model: ["2026 M4 GT3 EVO"](https://sketchfab.com/3d-models/bmw-m4-gt3-evo-2bb94e090bdb4df28ac34bc50df51d19) by **VTDAT23**, licensed [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/) (reduced in detail, badges and decals removed, recoloured with in-game liveries). Not affiliated with or endorsed by any car maker.
+- Everything else (the other cars, tracks, textures, music, other sounds, sponsor names) is generated in code.
