@@ -29,6 +29,15 @@ Open-wheelers, V8 touring cars, turbo street cars and go-karts. Nine tracks (inc
 
 Plug in an **Xbox or PlayStation controller** at any time — it's picked up automatically (with vibration).
 
+## 🆕 New in v1.7.1
+
+- **Steering fixed on every car**: less understeer, and more steering lock for hairpins and the kart spiral.
+- **Smoother drifting**: drifts no longer gain speed, rotate more gradually and straighten up when you let go. Controller **A** drifts too.
+- **Track limits**: going off in a race now gives a +1 s time penalty instead of an invalid lap.
+- **Indoor fun park**: a Ferris wheel and a roller coaster in the middle of Spiral Tower Indoor Karting, with gardens, paths, benches, lamps and people walking around.
+- **Glass and shadows**: tinted glass in the coupe windows, and soft car-shaped shadows instead of squares.
+- **Street and drift cockpit**: you sit higher, the steering wheel is lower, and the shifter sits on the console.
+
 ## 🆕 New in v1.7
 
 - **Drift Career**: a new single-player career with its own drift tracks. Hold **Space** (or brake while steering) to kick the car into a slide, steer the angle, use the throttle to hold it, and keep your speed. Points come from angle × speed, with a combo multiplier up to x5. There are six events with Bronze, Silver and Gold targets, and three drift cars. Drift is in Quick Race too.
