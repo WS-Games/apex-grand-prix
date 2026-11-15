@@ -21,7 +21,7 @@ $html = [regex]::Replace($html, '<link rel="preconnect"[^>]*>\s*', '')
 $html = [regex]::Replace($html, '<link href="https://fonts.googleapis.com[^>]*>\s*', '')
 [IO.File]::WriteAllText("$W\assets\index.html", $html, (New-Object Text.UTF8Encoding($false)))
 Copy-Item "$B\lib\three.module.js","$B\lib\addons\utils\BufferGeometryUtils.js" "$W\assets"
-Copy-Item "$Game\manifest.json","$Game\icon-192.png","$Game\icon-512.png","$Game\sounds.js","$Game\models.js" "$W\assets" -ErrorAction SilentlyContinue
+Copy-Item "$Game\manifest.json","$Game\icon-192.png","$Game\icon-512.png","$Game\sounds.js","$Game\models.js","$Game\models-scenery.js","$Game\models-jdm.js" "$W\assets" -ErrorAction SilentlyContinue
 # GLTFLoader for the car models, with its import pointed at the flat asset folder
 $gl = [IO.File]::ReadAllText("$B\lib\addons\loaders\GLTFLoader.js").Replace("from '../utils/BufferGeometryUtils.js'", "from './BufferGeometryUtils.js'")
 [IO.File]::WriteAllText("$W\assets\GLTFLoader.js", $gl, (New-Object Text.UTF8Encoding($false)))

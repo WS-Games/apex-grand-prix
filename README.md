@@ -6,7 +6,7 @@
 
 **A 3D motorsport game that runs right in your browser — and on your Android phone.**
 
-Open-wheelers, V8 touring cars, turbo street cars and go-karts. Eight tracks plus five kart circuits (including a figure-eight with a bridge and an indoor spiral tower) with bridges, tunnels and a city circuit, a full career mode, damage, safety cars, pit stops, hills and rain.
+Open-wheelers, V8 touring cars, turbo street cars and go-karts. Nine tracks (including the Ballarat Highway), three drift tracks and five kart circuits (including a figure-eight with a bridge and an indoor spiral tower) with bridges, tunnels and a city circuit, a full career mode, damage, safety cars, pit stops, hills and rain.
 
 [![Play in browser](https://img.shields.io/badge/%E2%96%B6%20PLAY%20NOW-in%20your%20browser-ff3b30?style=for-the-badge)](https://ws-games.github.io/apex-grand-prix/)
 [![Download APK](https://img.shields.io/badge/ANDROID-Download%20APK-3ddc84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/WS-Games/apex-grand-prix/releases/latest/download/ApexGP.apk)
@@ -26,14 +26,28 @@ Open-wheelers, V8 touring cars, turbo street cars and go-karts. Eight tracks plu
 |---|---|
 | **Browser (PC / Mac / phone)** | Open **[ws-games.github.io/apex-grand-prix](https://ws-games.github.io/apex-grand-prix/)** in Chrome or Edge. On a phone you can tap **⋮ → Add to Home screen** to install it — it then works offline. |
 | **Android app** | Download **[ApexGP.apk](https://github.com/WS-Games/apex-grand-prix/releases/latest/download/ApexGP.apk)**, tap it, and allow installing from your browser / files app when asked. Android 7+, fully offline. |
-| **Install on PC** | On the website in Chrome or Edge, click **Install on PC** in the main menu (or the install icon in the address bar). It then opens from your Start menu like a normal app and works offline. |
-| **Windows (offline download)** | Download **[ApexGP-Windows.zip](https://github.com/WS-Games/apex-grand-prix/releases/latest/download/ApexGP-Windows.zip)**, unzip it and double-click `Play Apex GP.bat`. No internet needed. |
 
 Plug in an **Xbox or PlayStation controller** at any time — it's picked up automatically (with vibration).
 
+## 🆕 New in v1.7
+
+- **Drift Career**: a new single-player career with its own drift tracks. Hold **Space** (or brake while steering) to kick the car into a slide, steer the angle, use the throttle to hold it, and keep your speed. Points come from angle × speed, with a combo multiplier up to x5. There are six events with Bronze, Silver and Gold targets, and three drift cars. Drift is in Quick Race too.
+- **Three drift tracks**: Harbor Drift Yard, Kurogane Touge (a hairpin climb and a fast descent) and the Sunset Coast loop.
+- **Japanese street cars**: the Street Turbo class is now MK4-style Supras and S14s, each in its own livery with a number and a sponsor. Drift cars come in black, white, grey or red.
+- **Ballarat Highway Circuit (Australia)**: a 5.9 km flat highway loop with three-lane markings, gum trees, roadside buildings, green highway signs, the Burger Barn and a rocky mountain to the north.
+
+| | |
+|---|---|
+| ![Street Turbo grid](docs/screenshots/v17-street-turbo.png) | ![Drift career](docs/screenshots/v17-drift-menu.png) |
+| <sub>Street Turbo: Supras and S14s</sub> | <sub>Drift Career</sub> |
+| ![Ballarat from above](docs/screenshots/v17-ballarat-aerial.png) | ![Drift S14](docs/screenshots/v17-drift-s14.png) |
+| <sub>Ballarat from above: buildings along the highway</sub> | <sub>S14 drift car</sub> |
+| ![Ballarat Highway](docs/screenshots/v17-ballarat-highway.png) | ![Burger Barn](docs/screenshots/v17-ballarat-burger-barn.png) |
+| <sub>Ballarat Highway Circuit</sub> | <sub>The roadside Burger Barn</sub> |
+
 ## 🆕 New in v1.6.1
 
-- **Install on PC and save files**: an *Install on PC* button, an offline Windows download, and *Save / Load progress to a file* in Settings.
+- **Save files**: *Save / Load progress to a file* in Settings.
 - **A rival every race** — the driver starting next to you is out to beat you: harder racing, fewer mistakes, and a **red name tag**.
 - **Driver names over cars** — small tags above nearby cars (toggle in Settings → Gameplay).
 - **Race announcer** — a big banner and voice call overtakes at the front, anything involving you or your rival, and the final lap.
@@ -223,4 +237,8 @@ docs/screenshots/       images used in this README
 - Crowd sound: ["F1 Crowd Air Horns"](https://freesound.org/s/200809/) by **WebbFilmsUK**, licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) (trimmed).
 - Open-wheel car model: ["2026 F1 Car new EVO"](https://skfb.ly/pMqnE) by **Abu Saif**, licensed [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/) (reduced in detail, recoloured with in-game liveries, new tyres).
 - GT3 car model: ["2026 M4 GT3 EVO"](https://sketchfab.com/3d-models/bmw-m4-gt3-evo-2bb94e090bdb4df28ac34bc50df51d19) by **VTDAT23**, licensed [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/) (reduced in detail, badges and decals removed, recoloured with in-game liveries). Not affiliated with or endorsed by any car maker.
+- Street/drift car (MK4-style): ["Toyota Supra MK4 (LowPoly)"](https://sketchfab.com/3d-models/36e53ad2f8f04e819baf5519dcb1bf7a) by **Mike Farrant**, licensed [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/) (badges removed, repainted with in-game liveries).
+- Street/drift car (S14-style): ["Nissan Silvia S14"](https://skfb.ly/oSSxs) by **S.K.**, licensed [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/) (repainted with in-game liveries).
+- Roadside buildings on the Ballarat Highway Circuit: ["Low-poly City Buildings"](https://skfb.ly/oMrLu) by **smooth998**, licensed [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/).
+- None of the car or building models are affiliated with or endorsed by any manufacturer or brand.
 - Everything else (the other cars, tracks, textures, music, other sounds, sponsor names) is generated in code.

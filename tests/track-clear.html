@@ -28,7 +28,7 @@ function run(){
   const ids=g.TRACKS.map(t=>t.id);let k=0;
   const next=()=>{if(k>=ids.length){finish(allOk,summary);return;}
     const id=ids[k++];const td=g.TRACKS.find(t=>t.id===id);
-    try{g.startRace({track:g.TRACKS.indexOf(td),cls:td.kart?'kart':'touring',laps:3,aiCount:0,grid:'mid',mode:'gp'});g.step(1);
+    try{g.startRace({track:g.TRACKS.indexOf(td),cls:td.kart?'kart':td.drift?'drift':'touring',laps:3,aiCount:0,grid:'mid',mode:'gp'});g.step(1);
       const t=g.TR,N=t.N,hw=t.halfW;const objs=[];
       g.trackGroup.traverse(o=>{if(!o.isMesh||o.userData.trk)return;let p=o.parent,trk=false;while(p&&p!==g.trackGroup){if(p.userData&&p.userData.trk)trk=true;p=p.parent;}if(trk)return;if(o.material&&o.material.transparent)return;objs.push(o);});
       let rays=0;const hits=[];
