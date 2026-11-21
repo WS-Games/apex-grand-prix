@@ -1,0 +1,37 @@
+<!doctype html><html><body><pre id="out">pending</pre>
+<!-- Road to Apex GP check: new tiers, licences, cars, upgrades, and starting a GT3 and an Apex GP event. -->
+<script>
+const out = document.getElementById('out');
+const log = s => { out.textContent = (out.textContent === 'pending' ? '' : out.textContent + '\n') + s; };
+const f = document.createElement('iframe'); f.src = '../index.html?mptest=1'; f.style.cssText = 'width:640px;height:360px;border:0'; document.body.appendChild(f);
+const ev = js => f.contentWindow.__mpEval(js);
+const wait = ms => new Promise(r => setTimeout(r, ms));
+f.onload = () => run().catch(e => log('ERR ' + e.stack));
+async function run() {
+  await wait(5000);
+  ev("ROAD=newRoad();ROAD.credits=600000;for(const L of ROAD_LIC)for(const t of L.tests)ROAD.tests[t.id]='gold';ROAD.garage=['kart4','kart2','street','gt3','apex'];saveRoad();");
+  ev("openRoad('events')");
+  log('events tab headings: ' + ev("[...document.querySelectorAll('#roadBody .desc')].map(d=>d.textContent).filter(t=>/TIER/.test(t)).join(' | ')"));
+  log('locked events: ' + ev("[...document.querySelectorAll('#roadBody .menu-btn')].filter(b=>b.textContent.includes('🔒')).length") + ' (all licences and cars owned)');
+  ev("ROAD_TAB='licences';buildRoad()");
+  log('licences: ' + ev("ROAD_LIC.map(l=>l.name+(licDone(l.id)?' ✓':'')).join(', ')"));
+  ev("ROAD_TAB='showroom';buildRoad()");
+  log('showroom: ' + ev("ROAD_CARS.filter(c=>c.price).map(c=>c.name+' '+fmtCr(c.price)).join(', ')"));
+  ev("ROAD_TAB='garage';buildRoad()");
+  const before = ev('ROAD.credits');
+  ev("[...document.querySelectorAll('#roadBody .menu-btn')].find(b=>b.textContent.startsWith('Engine'))&&[...document.querySelectorAll('#roadBody .menu-btn')].filter(b=>b.textContent.startsWith('Engine')).pop().click()");
+  log('bought Apex engine stage 1: credits ' + before + ' -> ' + ev('ROAD.credits') + ', apex upgrades ' + ev('JSON.stringify(roadUpg("apex"))'));
+  for (const id of ['t3_kestrel', 't4_final']) {
+    ev(`roadStartEvent(ROAD_EVENTS.find(e=>e.id==='${id}'))`); await wait(1500);
+    log(`${id}: state=${ev('state')} track=${ev('TRACKS[race.trackIdx].name')} class=${ev('race.cls')} cars=${ev('cars.length')} power x${ev('player.powerMul.toFixed(3)')}`);
+    ev('roadBack()'); await wait(500);
+  }
+  // champion: pretend we won the grand final
+  ev("roadStartEvent(ROAD_EVENTS.find(e=>e.id==='t4_final'))"); await wait(1200);
+  ev("player.pos=1;roadResults()");
+  log('after winning the final: title="' + ev("document.getElementById('resTitle').textContent") + '" champion=' + ev('ROAD.champion'));
+  ev('roadBack()'); await wait(300);
+  ev("localStorage.removeItem(RKEY)");
+  log('DONE');
+}
+</script></body></html>

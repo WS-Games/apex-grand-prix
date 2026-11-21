@@ -29,6 +29,15 @@ Open-wheelers, V8 touring cars, turbo street cars and go-karts. Nine tracks (inc
 
 Plug in an **Xbox or PlayStation controller** at any time — it's picked up automatically (with vibration).
 
+## 🆕 New in v1.9
+
+- **Online races for up to 10 players**: one person creates a room and up to 9 friends join with the code. Everyone gets their own grid slot (host on pole, then in joining order), and the results table lists every player. The host picks the track, car and laps; the race starts when everyone is ready.
+- **Smoother online racing**: car positions now go over a fast channel 30 times a second (was 20), late packets are skipped instead of holding up newer ones, and the delay adapts to each player's connection. Other cars glide instead of jumping.
+- **Road to Apex GP goes all the way to the top**:
+  - **Tier 3 · GT3 Series**: earn the International A licence, buy the GT3 Racer, and race 5 events.
+  - **Tier 4 · Apex Grand Prix**: earn the Super Licence, buy the Apex GP Car, and race 5 rounds plus the Grand Final at Big Mama. Win the final to become **Apex Grand Prix Champion**.
+  - **Garage upgrades**: Engine, Tyres and Aero, 3 stages each, for every car you own.
+
 ## 🆕 New in v1.8.1
 
 - **Joystick steering on phones**: put your thumb anywhere on the left side and slide to steer. Brake and Gas are on the right, plus a Drift button in drift races. Change it in Settings → Touch Steering.

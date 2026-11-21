@@ -1,0 +1,53 @@
+<!doctype html><html><body><pre id="out">pending</pre>
+<!-- Multiplayer test: N copies of the game in iframes, messages relayed by this page (MP.local mode). -->
+<script>
+const N = +(new URLSearchParams(location.search).get('n') || 4);
+const out = document.getElementById('out'), frames = [];
+const log = s => { out.textContent = (out.textContent === 'pending' ? '' : out.textContent + '\n') + s; };
+for (let i = 0; i < frames.length; i++) {
+  const f = document.createElement('iframe'); f.src = '../index.html?mptest=1'; f.style.cssText = 'width:320px;height:180px;border:0';
+  document.body.appendChild(f); frames.push(f);
+}
+// relay: every message goes to every other copy; each copy keeps only what is addressed to it
+window.addEventListener('message', e => { if (!e.data || !e.data.apexmp) return; for (const f of frames) if (f.contentWindow !== e.source) f.contentWindow.postMessage(e.data, '*'); });
+const ev = (i, js) => frames[i].contentWindow.__mpEval(js);
+const wait = ms => new Promise(r => setTimeout(r, ms));
+let loaded = 0; frames.forEach(f => f.onload = () => { if (++loaded === N) run().catch(e => log('ERR ' + e.stack)); });
+async function run() {
+  await wait(5000);
+  for (let i = 0; i < frames.length; i++) ev(i, `MP.local=true;MP.name='P${i}';S.mpId='g${i}';`);
+  ev(0, 'mpHost()'); await wait(300);
+  for (let i = 1; i < N; i++) { ev(i, "mpJoin('LOCAL')"); await wait(200); }
+  if (N > 10) { await wait(500); log('11th player status: ' + ev(N - 1, 'MP.status')); frames.pop(); }
+  await wait(800);
+  log('host lobby players: ' + ev(0, 'MP.players.map(p=>p.name).join(",")'));
+  log('guest1 sees: ' + ev(1, 'MP.players.map(p=>p.name).join(",")'));
+  for (let i = 1; i < frames.length; i++) ev(i, "MP.ready=true;mpSend({t:'ready',v:true})");
+  ev(0, 'MP.ready=true;mpLobbyChanged()'); await wait(600);
+  log('all ready on host: ' + ev(0, 'mpAllReady()'));
+  ev(0, 'mpStartRace()'); await wait(3000);
+  for (let i = 0; i < frames.length; i++) log(`P${i}: state=${ev(i, 'state')} cars=${ev(i, 'cars.length')} gridPos=${ev(i, 'player.gridPos')} remotes=${ev(i, 'Object.keys(MP.remotes).join(",")')}`);
+  // each copy moves its car to its own spot and sends 10 updates (33 ms apart), then everyone draws the others
+  for (let s = 0; s < 10; s++) {
+    for (let i = 0; i < frames.length; i++) ev(i, `player.x+=1.5;player.z+=${0.5 * i};mpSendState(race);`);
+    await wait(33);
+  }
+  await wait(250);
+  for (let i = 0; i < frames.length; i++) ev(i, 'for(const c of Object.values(MP.remotes))for(let k=0;k<30;k++)mpRemoteTick(c,0.016);');
+  for (let i = 0; i < frames.length; i++) {
+    const me = JSON.parse(ev(i, 'JSON.stringify({id:MP.myId,x:player.x,z:player.z})'));
+    for (let j = 0; j < frames.length; j++) { if (j === i) continue;
+      const seen = JSON.parse(ev(j, `(()=>{const c=MP.remotes['${me.id}'];return JSON.stringify(c?{x:c.x,z:c.z,n:(MP.snaps['${me.id}']||[]).length}:null)})()`));
+      if (!seen) { log(`P${j} has no car for P${i}`); continue; }
+      log(`P${i} as seen by P${j}: gap ${Math.hypot(seen.x - me.x, seen.z - me.z).toFixed(2)} m, updates received ${seen.n}`);
+    }
+  }
+  // results with 4 players (host finishes first)
+  for (let i = 0; i < frames.length; i++) ev(i, `player.finished=true;player.finishTime=${60 + 0}+${i};player.lap=race.laps+1;mpSendState(race);`);
+  await wait(300);
+  for (let i = 0; i < frames.length; i++) ev(i, 'for(const c of Object.values(MP.remotes))mpRemoteTick(c,0.016);mpResults();');
+  log('P2 results: ' + ev(2, "document.getElementById('resTitle').textContent+' | '+[...document.querySelectorAll('#resTable tr')].slice(1).map(r=>r.innerText.replace(/\\s+/g,' ')).join(' / ')"));
+  // an 11th player is refused
+  log('players in room: ' + ev(0, 'MP.players.length') + ' (max ' + ev(0, 'MP_MAX') + ')');  log('DONE');
+}
+</script></body></html>

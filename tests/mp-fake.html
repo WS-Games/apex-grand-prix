@@ -1,0 +1,46 @@
+<!doctype html><html><body><pre id="out">pending</pre>
+<!-- 10-player multiplayer test: the host and one guest are real copies of the game; 8 more players (and a
+     refused 11th) are simulated here and speak the same messages over the page relay (MP.local mode). -->
+<script>
+const out = document.getElementById('out');
+const log = s => { out.textContent = (out.textContent === 'pending' ? '' : out.textContent + '\n') + s; };
+const frames = [0, 1].map(() => { const f = document.createElement('iframe'); f.src = '../index.html?mptest=1'; f.style.cssText = 'width:320px;height:180px;border:0'; document.body.appendChild(f); return f; });
+const ev = (i, js) => frames[i].contentWindow.__mpEval(js);
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const fakes = {}; // id -> {got: {type: count}, seen: {id: count}}
+function fakeSend(id, msg) { const d = { apexmp: 1, from: id, to: 'h', msg }; for (const f of frames) f.contentWindow.postMessage(d, '*'); }
+window.addEventListener('message', e => { const d = e.data; if (!d || !d.apexmp) return;
+  for (const f of frames) if (f.contentWindow !== e.source) f.contentWindow.postMessage(d, '*');
+  for (const id in fakes) if (d.to === id || d.to === '*') { const F = fakes[id]; F.got[d.msg.t] = (F.got[d.msg.t] || 0) + 1; if (d.msg.t === 'st') F.seen[d.msg.id] = (F.seen[d.msg.id] || 0) + 1; if (d.msg.t === 'full') F.full = d.msg.why; if (d.msg.t === 'start') F.start = d.msg; }
+});
+let loaded = 0; frames.forEach(f => f.onload = () => { if (++loaded === 2) run().catch(e => log('ERR ' + e.stack)); });
+async function run() {
+  await wait(5000);
+  ev(0, "MP.local=true;MP.name='Host';"); ev(1, "MP.local=true;MP.name='RealGuest';S.mpId='greal';");
+  ev(0, 'mpHost()'); await wait(300); ev(1, "mpJoin('LOCAL')"); await wait(300);
+  for (let k = 1; k <= 8; k++) { const id = 'fake' + k; fakes[id] = { got: {}, seen: {} }; fakeSend(id, { t: 'hello', name: 'Bot' + k }); await wait(60); }
+  await wait(400);
+  log('players after 10 joined: ' + ev(0, 'MP.players.length') + ' -> ' + ev(0, 'MP.players.map(p=>p.name).join(", ")'));
+  fakes.fake11 = { got: {}, seen: {} }; fakeSend('fake11', { t: 'hello', name: 'Eleventh' }); await wait(300);
+  log('11th player: ' + (fakes.fake11.full ? 'refused (' + fakes.fake11.full + ')' : 'NOT refused') + ', players still ' + ev(0, 'MP.players.length'));
+  for (let k = 1; k <= 8; k++) fakeSend('fake' + k, { t: 'ready', v: true });
+  ev(1, "MP.ready=true;mpSend({t:'ready',v:true})"); ev(0, 'MP.ready=true;mpLobbyChanged()'); await wait(400);
+  log('everyone ready: ' + ev(0, 'mpAllReady()'));
+  ev(0, 'mpStartRace()'); await wait(2500);
+  log('host race: cars=' + ev(0, 'cars.length') + ' remotes=' + ev(0, 'Object.keys(MP.remotes).length'));
+  log('real guest race: cars=' + ev(1, 'cars.length') + ' grid P' + ev(1, 'player.gridPos') + ' remotes=' + ev(1, 'Object.keys(MP.remotes).length'));
+  log('simulated players got start with grid order of ' + (fakes.fake1.start ? fakes.fake1.start.order.length : 0));
+  // 1 second of racing at 30 updates a second from everyone
+  for (let s = 0; s < 30; s++) {
+    for (let k = 1; k <= 8; k++) fakeSend('fake' + k, { t: 'st', n: s + 1, rt: s / 30, st: 1, x: 10 * k, y: 0, z: s * 0.5, h: 0, vx: 15, vy: 0, d: 0, s: s * 0.5, lap: 1, fin: 0, ft: 0, pen: 0, thr: 1, rpm: 9000, g: 3 });
+    ev(0, 'mpSendState(race)'); ev(1, 'mpSendState(race)');
+    await wait(33);
+  }
+  await wait(300);
+  ev(1, 'for(const c of Object.values(MP.remotes))for(let k=0;k<20;k++)mpRemoteTick(c,0.016);');
+  log('real guest received updates from: ' + ev(1, "Object.entries(MP.snaps).map(([k,v])=>k+':'+v.length).join(' ')"));
+  log('real guest draws Bot3 at x=' + ev(1, "MP.remotes.fake3?MP.remotes.fake3.x.toFixed(1):'none'") + ' (sent 30.0)');
+  log('Bot1 received updates from: ' + Object.entries(fakes.fake1.seen).map(([k, v]) => k + ':' + v).join(' '));
+  log('DONE');
+}
+</script></body></html>
