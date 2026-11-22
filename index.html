@@ -446,8 +446,7 @@ const KART_TRACKS=[
     [0,0],[80,0],[150,0],[185,15],[190,45],[165,62],[130,55],[100,62],[95,90],[120,108],[160,110],[180,130],[165,155],[120,158],[80,145],[60,120],[30,118],[10,140],[-25,145],[-50,125],[-45,95],[-15,80],[-10,55],[-40,40],[-55,18],[-35,2]]},
   {id:'k_west',name:'Westfield Kart Park',loc:'Westfield Karting',halfW:4.8,wall:8,kart:true,pits:false,points:[
     [0,0],[120,0],[230,5],[290,30],[300,75],[270,105],[220,110],[195,130],[200,160],[240,180],[280,200],[285,240],[250,260],[190,255],[150,235],[130,205],[100,195],[70,210],[40,240],[0,245],[-40,225],[-55,190],[-40,160],[-10,140],[0,110],[-20,80],[-55,60],[-70,30],[-50,5]]},
-  {id:'k_practice',name:'Practice Track',loc:'Beginner Practice Lap',halfW:5.5,wall:8,kart:true,pits:false,points:[
-    [437,342,0],[470,310,0],[510,275,0],[550,240,0],[582,224,0],[603,215,0],[606,198,0],[592,182,0],[572,148,0],[556,118,0],[564,88,0],[548,64,0],[518,64,0],[508,90,0],[528,121,0],[495,122,0],[450,102,0],[410,86,0],[386,100,0],[384,124,0],[410,138,0],[436,150,0],[441,178,0],[438,212,0],[446,240,0],[466,254,0],[486,238,0],[490,212,2.5],[520,214,6.5],[550,240,8],[585,268,6.5],[608,298,2.5],[606,322,0],[572,332,0],[538,320,0.8],[514,296,2.8],[486,281,7],[458,290,10.5],[450,315,11],[464,342,11],[478,372,7.5],[476,404,3.5],[446,414,0.8],[410,402,0],[386,408,0],[366,386,0],[352,352,0],[346,326,0],[366,314,0],[386,330,0],[392,352,0],[408,372,0],[425,356,0]].map(p=>[(p[0]-437)*0.9,(p[1]-342)*0.9,p[2]]),bridge:[[27,31],[35,43]]},
+  {id:'k_practice',name:'Practice Track',loc:'Beginner Practice Lap',halfW:5.5,wall:8,kart:true,pits:false,embank:true,bridge:[[9,18],[19,28]],tunnel:[{a:37,len:230}],points:(()=>{const P=[[437,342],[470,310],[510,275],[550,240],[582,224],[603,215],[606,198],[592,182],[572,148],[556,118],[564,88],[548,64],[518,64],[508,90],[528,121],[495,122],[450,102],[410,86],[386,100],[384,124],[410,138],[436,150],[441,178],[438,212],[446,240],[466,254],[486,238],[490,212],[520,214],[550,240],[585,268],[608,298],[606,322],[572,332],[538,320],[514,296],[486,281],[458,290],[450,315],[464,342],[478,372],[476,404],[446,414],[410,402],[386,408],[366,386],[352,352],[346,326],[366,314],[386,330],[392,352],[408,372],[425,356]],H={24:0,25:1.5,26:4,27:8,28:12,29:13,30:12,31:8,32:4,33:1.5,34:3,35:7.5,36:12,37:13,38:13,39:13,40:9,41:4,42:1,43:0};const R=P.map((p,k)=>[(p[0]-437)*0.9,(p[1]-342)*0.9,H[k]||0]);return R.slice(15).concat(R.slice(0,15));})()},
   // figure-eight kart track: the start straight dives under a 5 m bridge, the back section climbs over it
   {id:'k_cross',name:'Crossover Kart Park',loc:'Riverside Karting',halfW:4.5,wall:8,kart:true,pits:false,bridge:[[14,18]],points:[
     [-90,-62,0],[-50,-40,0],[0,0,0],[40,40,0],[78,70,0],[122,84,0],[160,70,0],[175,40,0],[160,15,0],[170,-12,0],[200,-30,0],[195,-62,0],[160,-75,0],[125,-62,0.5],
@@ -500,6 +499,13 @@ const TRACKS=[
     [0,0,0],[250,0,0],[430,0,0],[560,40,0],[660,140,0],[800,300,0],[930,440,2],[1000,560,6],[1030,670,9],[970,750,11],[880,775,12],[800,820,13],[700,795,14],
     [620,700,15],[580,580,15],[640,450,14],[800,300,13],[930,180,8],[1020,60,3],[1030,-70,0.5],[960,-170,0],[800,-215,0],[550,-220,0],[300,-200,0],[50,-200,0],
     [-200,-190,0],[-380,-160,0],[-500,-100,0],[-510,-20,0],[-420,5,0],[-250,0,0]]},
+  // Alpine Lake Circuit: a fast mountain road course (traced from the player's sketch) with a lake in the middle, tunnels through the hills and a town around the track
+  {id:'alpinelake',name:'Alpine Lake Circuit',loc:'Mountain Lake Valley',halfW:8,wall:14,alpine:true,city:true,lake:true,lakePos:{x:125,z:735,r:95},tunnel:[[9,12],[19,22]],
+    zones:[{x:-1400,z:600,r:420,h0:30,h1:200,n:200},{x:2000,z:600,r:440,h0:30,h1:200,n:200},{x:300,z:-1000,r:420,h0:30,h1:190,n:180},{x:300,z:2300,r:440,h0:30,h1:200,n:200}],
+    points:[[815,345,0],[833,378,1],[852,412,2],[872,448,3],[900,478,3],[935,500,4],[975,528,5],[1003,552,6],[1010,570,7],[1000,600,8],[968,626,8],[945,606,8],[922,578,7],[898,568,6],[870,545,5],[842,523,5],[815,520,4],[790,535,4],[752,572,3],[722,586,2],[702,572,2],[695,548,2],[708,530,3],[735,515,3],[770,495,4],[802,473,6],[818,462,7],[812,452,8],[790,425,9],[770,400,10],[772,383,11],[796,375,12],[790,362,12],[770,335,11],[752,303,9],[772,306,6],[795,322,3]].map(p=>[(p[0]-815)*5,(p[1]-345)*5,p[2]])},
+  // Gilded Skyline Grand Prix: a downtown street circuit (traced from the player's sketch) packed with luxury towers, with a tunnel section and a crossing where the road climbs a hill over the tunnel
+  {id:'skyline',name:'Gilded Skyline Grand Prix',loc:'Luxury Downtown',halfW:7.5,wall:12,street:true,city:true,metro:true,embank:true,bridge:[[29,35]],tunnel:[{a:4,len:300},[15,19],[21,25]],
+    points:(()=>{const P=[[623,355],[624,320],[626,296],[634,278],[644,262],[650,250],[658,238],[668,224],[678,208],[690,180],[697,158],[712,141],[730,142],[745,151],[757,158],[762,138],[770,127],[776,138],[778,148],[768,160],[756,168],[750,182],[743,194],[736,206],[734,222],[728,232],[712,238],[700,240],[698,252],[708,260],[690,254],[674,246],[658,238],[642,228],[618,226],[593,226],[565,240],[540,262],[524,290],[520,317],[535,350],[558,378],[580,397],[602,400],[620,392],[626,375]],H={29:0,30:4,31:8,32:12,33:8,34:3,35:0};return P.map((p,k)=>[(p[0]-623)*4.9,(p[1]-355)*4.9,H[k]||0]);})()},
 ];
 TRACKS.push(...KART_TRACKS);
 /* DRIFT tracks: wide, flowing, linked corners; only the Drift career races here */
@@ -858,7 +864,7 @@ function buildTrackData(def){
     const mark=(arr,zs)=>{for(const z of zs||[]){const i0=at(Array.isArray(z)?z[0]:z.a);const cnt=Array.isArray(z)?((at(z[1])-i0+N)%N):Math.round(z.len/t.sp);for(let k=0;k<cnt;k++)arr[(i0+k)%N]=1;}};
     mark(t.br,def.bridge);mark(t.tn,def.tunnel);
     const ts=[];for(let i=0;i<N;i++)if(t.tn[i]){ts.push(i);let a=0,b=0;while(a<N&&t.tn[(i-a-1+N)%N])a++;while(b<N&&t.tn[(i+b+1)%N])b++;t.tnD[i]=Math.min(a,b)*t.sp;}
-    if(ts.length){t.tunS=ts;let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9;for(const i of ts){x0=Math.min(x0,t.px[i]);x1=Math.max(x1,t.px[i]);z0=Math.min(z0,t.pz[i]);z1=Math.max(z1,t.pz[i]);}t.tunBox=[x0-60,x1+60,z0-60,z1+60];}}
+    if(ts.length){t.tunS=ts;t.tnEmb=new Uint8Array(N);if(def.embank){const ib=[];for(let j=0;j<N;j+=3)if(t.br[j])ib.push(j);let g0=0;for(let k=0;k<=ts.length;k++){if(k===ts.length||(k>g0&&ts[k]!==ts[k-1]+1)){let em=false;for(let q=g0;q<k&&!em;q+=4)for(const j of ib)if(Math.hypot(t.px[j]-t.px[ts[q]],t.pz[j]-t.pz[ts[q]])<45){em=true;break;}if(em)for(let q=g0;q<k;q++)t.tnEmb[ts[q]]=1;g0=k;}}}let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9;for(const i of ts){x0=Math.min(x0,t.px[i]);x1=Math.max(x1,t.px[i]);z0=Math.min(z0,t.pz[i]);z1=Math.max(z1,t.pz[i]);}const bm=60+(def.moundExt||35);t.tunBox=[x0-bm,x1+bm,z0-bm,z1+bm];}}
   t.wallL=F();t.wallR=F();t.surfL=new Uint8Array(N);t.surfR=new Uint8Array(N);t.kerb=new Uint8Array(N);
   const WB=def.wall||22;
   for(let i=0;i<N;i++){let wl=WB,wr=WB;const k=t.ks[i];
@@ -1043,12 +1049,12 @@ function liftScenery(){const t=TR;if(!t.hasH)return;const M=new THREE.Matrix4(),
 function sampleHG(h,x,z){const fx=(x-h.x0)/h.dx,fz=(z-h.z0)/h.dz,n=h.n;if(!(fx>=0&&fz>=0&&fx<n-1&&fz<n-1))return null;const ix=fx|0,iz=fz|0,u=fx-ix,v=fz-iz,y=h.y,o=iz*n+ix;return (y[o]*(1-u)+y[o+1]*u)*(1-v)+(y[o+n]*(1-u)+y[o+n+1]*u)*v;}
 function groundAt(t,x,z){let g=t.hg?sampleHG(t.hg,x,z):null;if(g===null)g=t.terrain(x,z);return t.tunS?Math.max(g,moundAt(t,x,z)):g;}
 function moundAt(t,x,z){const B=t.tunBox;if(x<B[0]||x>B[1]||z<B[2]||z>B[3])return -1e9;let bd=1e18,bi=-1;for(const i of t.tunS){const dx=x-t.px[i],dz=z-t.pz[i],d=dx*dx+dz*dz;if(d<bd){bd=d;bi=i;}}
-  const W=t.halfW+15,d=Math.sqrt(bd),N=t.N;if(d>W+35)return -1e9;
+  const W=t.halfW+15,d=Math.sqrt(bd),N=t.N;if(t.tnEmb&&t.tnEmb[bi])return -1e9;if(d>W+(t.def.moundExt||35))return -1e9;
   const al=(x-t.px[bi])*t.tx[bi]+(z-t.pz[bi])*t.tz[bi];if((!t.tn[(bi-1+N)%N]&&al<-1)||(!t.tn[(bi+1)%N]&&al>1))return -1e9;
   return moundH(t,bi,d,t.terrain(x,z));}
 // rounded hill profile over a tunnel: crown above the tunnel, easing down to the ground 35 m past the tunnel walls
 const MOUND_TOP=12;
-function moundH(t,i,d,ground){const W=t.halfW+15,top=t.py[i]+MOUND_TOP;if(d<=W*0.5)return top+1.5*(1-d/(W*0.5));if(d>=W+35)return ground-1.5;return lerp(top,Math.min(top,ground-1.5),smooth((d-W*0.5)/(W*0.5+35)));}
+function moundH(t,i,d,ground){const W=t.halfW+15,E=t.def.moundExt||35,top=t.py[i]+(t.def.moundTop||MOUND_TOP);if(d<=W*0.5)return top+1.5*(1-d/(W*0.5));if(d>=W+E)return ground-1.5;return lerp(top,Math.min(top,ground-1.5),smooth((d-W*0.5)/(W*0.5+E)));}
 function runsOf(fn){const N=TR.N;const out=[];let st=-1;for(let i=0;i<N;i++)if(!fn(i))st=i;if(st<0)return[[0,N]];
   let i=st+1,n=0;while(n<N){while(n<N&&!fn(i%N)){i++;n++;}if(n>=N)break;const s=i;while(n<N&&fn(i%N)){i++;n++;}out.push([s%N,i-s]);}return out;}
 function addBox(w,h,d,x,y,z,ry,mat,cast=true,parent=trackGroup){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);m.rotation.y=ry;m.castShadow=cast;m.receiveShadow=true;parent.add(m);return m;}
@@ -1064,6 +1070,11 @@ function buildCrossings(){const t=TR,N=t.N,hw=t.halfW;if(!t.br)return;
   for(const [s,c] of runsOf(i=>t.br[i])){if(c>=N)break;
     ribbon(s,c,i=>-(t.wallR[i]+0.6),i=>t.wallL[i]+0.6,-1.3,MAT.brC,10);
     for(const side of [1,-1]){const wall=side>0?t.wallL:t.wallR;wallRibbon(s,c,i=>side*(wall[i]+0.6),-1.3,1.75,MAT.brC,20);}
+    if(t.def.embank){if(!MAT.grassDS){MAT.grassDS=MAT.grass.clone();MAT.grassDS.side=THREE.DoubleSide;}const pos=[],uv=[],ix=[];
+      for(let k=0;k<=c;k++){const i=(s+k)%N,yd=t.py[i]-1.3;const vs=[];for(const side of [-1,1]){const e=(side>0?t.wallL[i]:t.wallR[i])+0.6;const x0=t.px[i]+t.nx[i]*side*e,z0=t.pz[i]+t.nz[i]*side*e;const g1=t.terrain(x0,z0);const run=Math.max(0.6,(yd-g1+1.5)*1.8);const x1=t.px[i]+t.nx[i]*side*(e+run),z1=t.pz[i]+t.nz[i]*side*(e+run);const g2=t.terrain(x1,z1);vs.push([x1,Math.min(g2-1.5,yd-0.3),z1],[x0,yd,z0]);}
+        for(const v of vs){pos.push(v[0],v[1],v[2]);uv.push(v[0]/8,v[2]/8);}
+        if(k<c){const b=k*4;ix.push(b,b+4,b+1,b+1,b+4,b+5,b+2,b+6,b+3,b+3,b+6,b+7);}}
+      const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(ix);g.computeVertexNormals();const em=new THREE.Mesh(g,MAT.grassDS);em.receiveShadow=true;em.userData.trk=true;trackGroup.add(em);continue;}
     let top=s,topH=-1e9;for(let k=0;k<c;k++){const i=(s+k)%N;if(t.py[i]>topH){topH=t.py[i];top=i;}}
     // piers wherever the deck is up in the air, never on another part of the track
     for(let k=6;k<c-3;k+=12){const i=(s+k)%N;const x=t.px[i],z=t.pz[i];const g=t.terrain(x,z);const h=t.py[i]-1.3-g;if(h<1.5)continue;
@@ -1084,7 +1095,8 @@ function buildCrossings(){const t=TR,N=t.N,hw=t.halfW;if(!t.br)return;
     ribbon(s,c,i=>-(t.wallR[i]+0.12),i=>t.wallL[i]+0.12,H,MAT.tunC,10);
     for(let k=2;k<c-1;k+=4){const i=(s+k)%N;const ry=headingOf(t.tx[i],t.tz[i]);for(const o of [-(hw-1.5),hw-1.5])box(0.35,0.08,2.4,t.px[i]+t.nx[i]*o,t.py[i]+H-0.06,t.pz[i]+t.nz[i]*o,ry,MAT.tunL).castShadow=false;}
     // the hill over the tunnel: a rounded grassy hill (same shape moundAt uses, so trees sit on it)
-    const prof=[-(W+35),-(W+18),-W,-W*0.5,0,W*0.5,W,W+18,W+35],PN=prof.length;const pos=[],uv=[],idx=[];
+    if(t.tnEmb&&t.tnEmb[(s+(c>>1))%N]){const fh=H+1.4;for(const i of [s,(s+c)%N]){const ry=headingOf(t.tx[i],t.tz[i]);const wl=t.wallL[i]+0.12,wr=t.wallR[i]+0.12;const P=(o,dy)=>[t.px[i]+t.nx[i]*o,t.py[i]+dy,t.pz[i]+t.nz[i]*o];let q;q=P(wl+2,fh/2-1);box(4,fh+1,1.6,q[0],q[1],q[2],ry,MAT.brC);q=P(-(wr+2),fh/2-1);box(4,fh+1,1.6,q[0],q[1],q[2],ry,MAT.brC);q=P((wl-wr)/2,H+(fh-H)/2);box(wl+wr,fh-H,1.6,q[0],q[1],q[2],ry,MAT.brC);}continue;}
+    const E=t.def.moundExt||35,prof=[-(W+E),-(W+E*0.5),-W,-W*0.5,0,W*0.5,W,W+E*0.5,W+E],PN=prof.length;const pos=[],uv=[],idx=[];
     for(let k=0;k<=c;k++){const i=(s+k)%N;for(const o of prof){const x=t.px[i]+t.nx[i]*o,z=t.pz[i]+t.nz[i]*o;pos.push(x,moundH(t,i,Math.abs(o),t.terrain(x,z)),z);uv.push(o/26,k*t.sp/26);}
       if(k<c){const b=k*PN;for(let q=0;q<PN-1;q++)idx.push(b+q,b+q+PN,b+q+1,b+q+1,b+q+PN,b+q+PN+1);}}
     const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);g.computeVertexNormals();
@@ -1416,7 +1428,8 @@ function vegTint(t){if(!VEG.ready||!t)return;const f=Math.max(0.45,Math.min(1.1,
 function vegBuild(t,near,R,det,pitBox,inLake){const {minx,maxx,minz,maxz}=t.bounds,def=t.def;
   const conf=def.alpine?0.55:(def.metro?0.2:(def.id==='ballarat'?0.12:(0.15+((def.id.length*7)%4)*0.05)));
   const cap=({medium:7000,high:22000,ultra:36000})[S.quality]||7000,nearCap=({medium:0,high:900,ultra:1600})[S.quality]||0;
-  const lst=[[],[]],nearL=[[],[]],twin=[[],[]];const free=(x,z,m)=>!pitBox(x,z)&&!inLake(x,z,m)&&!(t.bldg||[]).some(b=>Math.hypot(b.x-x,b.z-z)<b.r+8+m*0.5)&&!(t.pads||[]).some(p=>Math.hypot(p.x-x,p.z-z)<p.r+6+m)&&!t.tvCams.some(cm=>Math.hypot(cm.x-x,cm.z-z)<18+m*0.3);
+  if(def.embank&&!t.brPts){t.brPts=[];for(let i=0;i<t.N;i+=3)if(t.br[i])t.brPts.push([t.px[i],t.pz[i],(Math.max(0,t.py[i]+0.2))*1.8+t.wallL[i]+3]);}
+  const lst=[[],[]],nearL=[[],[]],twin=[[],[]];const free=(x,z,m)=>!pitBox(x,z)&&!(t.brPts&&t.brPts.some(p=>Math.hypot(p[0]-x,p[1]-z)<p[2]+m))&&!inLake(x,z,m)&&!(t.bldg||[]).some(b=>Math.hypot(b.x-x,b.z-z)<b.r+8+m*0.5)&&!(t.pads||[]).some(p=>Math.hypot(p.x-x,p.z-z)<p.r+6+m)&&!t.tvCams.some(cm=>Math.hypot(cm.x-x,cm.z-z)<18+m*0.3);
   // trees never overlap each other: 6 m spatial hash, canopy radii must not intersect
   const HC=6,hash=new Map(),hk=(a,b)=>a*100003+b;
   const clash=(x,z,rr)=>{const cx=Math.floor(x/HC),cz=Math.floor(z/HC);for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++){const l=hash.get(hk(cx+a,cz+b));if(l)for(const q of l)if(Math.hypot(q.x-x,q.z-z)<rr+q.rr)return true;}return false;};
@@ -1466,8 +1479,8 @@ function buildForest(t,near,R){ensureFoliage();
   // grass tufts and flowers on the verges, inside and just outside the barriers (kept at track height)
   const city=!!t.def.metro;const tufts=[],flowers=[[],[],[]];const tMax=city?0:Math.round((({low:2000,medium:9000,high:20000,ultra:32000})[S.quality]??20000)*(isTouch?0.5:1));const hw=t.halfW;
   for(let n=0;n<tMax*3&&tufts.length+flowers[0].length+flowers[1].length+flowers[2].length<tMax;n++){const i=Math.floor(R()*N);const side=R()<0.5?1:-1;const w=side>0?t.wallL[i]:t.wallR[i];const code=side>0?t.surfL[i]:t.surfR[i];
-    let o;if(R()<0.55){if(code!==0)continue;o=hw+2.6+R()*Math.max(0.5,w-hw-3.6);}else o=w+0.9+R()*5;if(t.pitD(i*t.sp)<t.pitLen+10&&side>0)continue;
-    const x=t.px[i]+t.nx[i]*side*o,z=t.pz[i]+t.nz[i]*side*o;const rr=R();const it={x,z,y:t.py[i]+bankY(i,side*o),s:0.7+R()*0.8,r:R()*6.283,h:rr<0.3?0.55+R()*0.3:(rr<0.75?0.9+R()*0.4:1.6+R()*1.2)};
+    let o;if(R()<0.55){if(code!==0)continue;o=hw+3.6+R()*Math.max(0.5,w-hw-4.6);}else o=w+0.9+R()*5;if(t.pitD(i*t.sp)<t.pitLen+10&&side>0)continue;
+    const x=t.px[i]+t.nx[i]*side*o,z=t.pz[i]+t.nz[i]*side*o;if(near(x,z,hw+2.4))continue;const rr=R();const it={x,z,y:t.py[i]+bankY(i,side*o),s:0.7+R()*0.8,r:R()*6.283,h:rr<0.3?0.55+R()*0.3:(rr<0.75?0.9+R()*0.4:1.6+R()*1.2)};
     if(R()<0.22)flowers[Math.floor(R()*3)].push(it);else tufts.push(it);}
   const plant=(list,mat)=>{if(!list.length)return;const im=new THREE.InstancedMesh(FOL.tuftGeo,mat,list.length);list.forEach((d,k)=>{Q.setFromAxisAngle(Y,d.r);SC.set(d.s,d.s*(d.h||1),d.s);M.compose(PV.set(d.x,d.y,d.z),Q,SC);im.setMatrixAt(k,M);});im.receiveShadow=true;im.userData.trk=true;trackGroup.add(im);};
   plant(tufts,FOL.grassMat);flowers.forEach((l,k)=>plant(l,FOL.flowerMats[k]));

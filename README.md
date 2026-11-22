@@ -29,7 +29,17 @@ Open-wheelers, V8 touring cars, turbo street cars and go-karts. Nine tracks (inc
 
 Plug in an **Xbox or PlayStation controller** at any time — it's picked up automatically (with vibration).
 
-## 🆕 New in v1.9.6
+## 🆕 New in v1.9.7
+
+![Gilded Skyline Grand Prix](docs/screenshots/gilded-skyline.jpg)
+![Alpine Lake Circuit](docs/screenshots/alpine-lake.jpg)
+![Practice Track hill](docs/screenshots/practice-hill.jpg)
+
+- **Gilded Skyline Grand Prix (new):** a 4.6 km downtown street circuit packed with glass towers, with tunnels and a crossing where the road climbs a hill over a tunnel.
+- **Alpine Lake Circuit (new):** a 5.9 km mountain road course with a lake in the middle, tunnels through the hills and a town around the track.
+- **Practice Track:** the crossings are now hills over tunnels (no more bridges), and the start line moved to a flat straight.
+- **Grass:** grass tufts now stay further from the road and never sit near another part of the track.
+## New in v1.9.6
 
 - **Practice Track bridges:** the places where the Practice Track crosses itself are now real bridges. The road climbs over the road below it (at least 4.5 m of clearance), so nothing sits on the track any more. The centre crossing and the loop near the start both use bridges.
 ## New in v1.9.5
