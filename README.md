@@ -29,7 +29,10 @@ Open-wheelers, V8 touring cars, turbo street cars and go-karts. Nine tracks (inc
 
 Plug in an **Xbox or PlayStation controller** at any time — it's picked up automatically (with vibration).
 
-## 🆕 New in v1.9.5
+## 🆕 New in v1.9.6
+
+- **Practice Track bridges:** the places where the Practice Track crosses itself are now real bridges. The road climbs over the road below it (at least 4.5 m of clearance), so nothing sits on the track any more. The centre crossing and the loop near the start both use bridges.
+## New in v1.9.5
 
 - **Private and public races are separate buttons:** Multiplayer now has "Create private race" (code only, not listed) and "Create public race" (listed in Public Servers). Joining by room code still works.
 - **Cleaner menus:** the A / B / Change button hints at the bottom right are gone.
