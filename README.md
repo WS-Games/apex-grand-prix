@@ -29,6 +29,14 @@ Open-wheelers, V8 touring cars, turbo street cars and go-karts. Nine tracks (inc
 
 Plug in an **Xbox or PlayStation controller** at any time — it's picked up automatically (with vibration).
 
+## 🆕 New in v1.9.1 (computers only)
+
+- **Much better graphics on PC**: real photo-scanned track surfaces (asphalt, grass, gravel, concrete), realistic sky reflections, and detailed buildings on all 17 circuits: stepped grandstands with individual seats and spectators, steel-roofed stands, pit garages with roller doors and a glass hospitality level, and a race control tower. Each circuit has its own colours and building styles.
+- **A real forest around every circuit**: about 20,000 scanned trees (real 3D trees up close, baked far-view trees in the distance) right up behind the barriers. Every tree is checked so it never grows through a building, stand, barrier or the track, and trees never overlap each other.
+- **Phones and the Android app are unchanged** and keep the lighter graphics, so they run smoothly (the APK on this release is the same v1.9 app).
+- **Engine Workshop**: build your own engine (6 layouts, turbo, exhaust, tuning), hear it live, save, load and install it. Every number box can be typed into. Custom engines change the sound only unless you switch on "Engine affects performance". Stock handling is unchanged.
+- **Sound**: smoother, cleaner F1 engine (no echo), a pitch drop on upshifts with no pops, rev blips and pops only on downshifts, karts that sound like small petrol engines, and GT3 flames from the real tailpipes.
+- **New menu look** across the game, with the red tab bar and WS GAMES branding.
 ## 🆕 New in v1.9
 
 - **Online races for up to 10 players**: one person creates a room and up to 9 friends join with the code. Everyone gets their own grid slot (host on pole, then in joining order), and the results table lists every player. The host picks the track, car and laps; the race starts when everyone is ready.
@@ -287,6 +295,9 @@ docs/screenshots/       images used in this README
 - Street/drift car (MK4-style): ["Toyota Supra MK4 (LowPoly)"](https://sketchfab.com/3d-models/36e53ad2f8f04e819baf5519dcb1bf7a) by **Mike Farrant**, licensed [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/) (badges removed, repainted with in-game liveries).
 - Street/drift car (S14-style): ["Nissan Silvia S14"](https://skfb.ly/oSSxs) by **S.K.**, licensed [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/) (repainted with in-game liveries).
 - Roadside buildings on the Ballarat Highway Circuit: ["Low-poly City Buildings"](https://skfb.ly/oMrLu) by **smooth998**, licensed [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/).
+- Track textures from [Poly Haven](https://polyhaven.com) (CC0): "Asphalt Track", "Asphalt Pit Lane" and "Gravel" by Dimitrios Savva, "Grass Ground" by Charlotte Baglioni, "Brushed Concrete" by Dario Barresi and Dimitrios Savva.
+- Sky reflections from the Poly Haven HDRI "Kloofendal 48d Partly Cloudy (Pure Sky)" by Greg Zaal and Jarod Guest (CC0).
+- Trees from Poly Haven (CC0): "Tree Small 02" by Rico Cilliers and "Fir Sapling Medium" by Rob Tuytel and Rico Cilliers (simplified for the browser).
 - None of the car or building models are affiliated with or endorsed by any manufacturer or brand.
 - Everything else (the other cars, tracks, textures, music, other sounds, sponsor names) is generated in code.
 

@@ -1,0 +1,27 @@
+<!doctype html><html><body><pre id="out">pending</pre><script>
+// forest check: loads the trees, builds circuits, reports counts + timing, screenshots. Silent.
+window.__shots={};const lines=[];const log=s=>{lines.push(s);document.getElementById('out').textContent=lines.join('\n');};
+const Q=new URLSearchParams(location.search);const f=document.createElement('iframe');f.src='../index.html?mptest=1'+(Q.get('pcgfx')?'&pcgfx='+Q.get('pcgfx'):'');f.style.cssText='width:1280px;height:720px;border:0';document.body.appendChild(f);
+const ev=js=>f.contentWindow.__mpEval(js);const wait=ms=>new Promise(r=>setTimeout(r,ms));
+f.onload=async()=>{try{await wait(9000);
+ ev("window.__errs=[];window.addEventListener('error',e=>__errs.push(String(e.message)));const ce=console.error;console.error=(...a)=>{__errs.push(a.map(String).join(' ').slice(0,200));ce(...a)};S.quality='"+(Q.get('q')||'high')+"';applyQualityMaterials();S.timeOfDay='day';");
+ log('PC_GFX '+ev('PC_GFX')+', trees ready '+ev('VEG.ready')+', species '+ev('VEG.sp.length'));
+ const ids=(Q.get('ids')||'costa').split(',');
+ for(const id of ids){const i=+ev(`TRACKS.findIndex(t=>t.id==='${id}')`);const kart=ev(`!!TRACKS[${i}].kart`);const e0=+ev('__errs.length');const t0=performance.now();
+   ev(`startRace({track:${i},cls:'${kart?'kart':'f1'}',mode:'tt',seed:3,weather:'dry'});`);const buildMs=Math.round(performance.now()-t0);await wait(Q.get('shots')?1500:150);
+   const info=ev("(()=>{let imp=0,mesh=0,tris=0;trackGroup.traverse(o=>{if(o.isInstancedMesh&&o.userData.tree){if(o.userData.farForest)imp+=o.count;if(o.userData.vegNear)mesh+=o.count;}});return imp+' impostors, '+mesh+' real trees';})()");
+   log(`${id}: build ${buildMs} ms, ${info}, new errors ${+ev('__errs.length')-e0}`);
+   const v=JSON.parse(ev(`(()=>{const M=new THREE.Matrix4(),P=new THREE.Vector3(),Q=new THREE.Quaternion(),S=new THREE.Vector3();const T=TR,pads=(T.pads||[]).concat((T.bldg||[]).map(b=>({x:b.x,z:b.z,r:Math.max(0,b.r-6)})));const pts=[];
+     trackGroup.traverse(m=>{if(m.isInstancedMesh&&m.userData.tree&&(m.userData.vegNear||m.userData.farForest)){for(let i=0;i<m.count;i++){m.getMatrixAt(i,M);M.decompose(P,Q,S);if(!(S.x>1e-4))continue;pts.push([P.x,P.z,S.x,m.userData.vegNear?1:0]);}}});
+     let inPad=0,onTrack=0;const cell=30,g=new Map();for(let i=0;i<T.N;i+=2){const k=Math.floor(T.px[i]/cell)+','+Math.floor(T.pz[i]/cell);let l=g.get(k);if(!l)g.set(k,l=[]);l.push(i);}
+     const nearTrack=(x,z,r)=>{const cx=Math.floor(x/cell),cz=Math.floor(z/cell),rr=Math.ceil(r/cell);for(let a=-rr;a<=rr;a++)for(let b=-rr;b<=rr;b++){const l=g.get((cx+a)+','+(cz+b));if(l)for(const i of l){const dx=x-T.px[i],dz=z-T.pz[i];if(dx*dx+dz*dz<r*r)return true;}}return false;};
+     for(const [x,z] of pts){for(const p of pads){if(Math.hypot(p.x-x,p.z-z)<p.r){inPad++;break;}}if(nearTrack(x,z,Math.max(12,Math.min(...[T.halfW])+6)))onTrack++;}
+     const hs=new Map();let over=0;for(const [x,z] of pts){const k=Math.floor(x/4)*100003+Math.floor(z/4);let l=hs.get(k);if(!l)hs.set(k,l=[]);l.push([x,z]);}
+     for(const [x,z] of pts){const cx=Math.floor(x/4),cz=Math.floor(z/4);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const l=hs.get((cx+a)*100003+cz+b);if(l)for(const q of l){if(q[0]===x&&q[1]===z)continue;if(Math.hypot(q[0]-x,q[1]-z)<1.8)over++;}}}
+     return JSON.stringify({n:pts.length,inPad,onTrack,overlaps:over/2});})()`));
+   log(`   placement check: ${v.n} trees, ${v.inPad} inside structures, ${v.onTrack} on the track corridor, ${v.overlaps} overlapping pairs`);   if(Q.get('shots')){await wait(2500);window.__shots[id+'_grid']=ev("camMode='chase';for(let i=0;i<40;i++){updateCarVisuals(0);updateCamera(1);}renderFrame();renderFrame();renderer.domElement.toDataURL('image/jpeg',0.85)");
+     window.__shots[id+'_tv']=ev("camMode='tv';for(let i=0;i<40;i++){updateCarVisuals(0);updateCamera(1);}renderFrame();renderFrame();renderer.domElement.toDataURL('image/jpeg',0.85)");
+     window.__shots[id+'_heli']=ev("camMode='heli';for(let i=0;i<40;i++){updateCarVisuals(0);updateCamera(1);}renderFrame();renderFrame();renderer.domElement.toDataURL('image/jpeg',0.85)");}
+   ev('quitToMenu()');await wait(300);}
+ log('errors: '+ev('JSON.stringify(__errs.slice(0,6))'));}catch(e){log('ERR '+e.stack);}document.title='DONE';};
+</script></body></html>

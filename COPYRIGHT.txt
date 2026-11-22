@@ -15,6 +15,7 @@ Third-party assets keep their own licences and remain the work of their creators
 - "Low-poly City Buildings" by smooth998 - CC BY 4.0
 - "BCR F1 Car 19" by LG (freesound.org) - CC BY 4.0
 - "F1 Crowd Air Horns" by WebbFilmsUK (freesound.org) - CC BY 4.0
+- Textures, sky and trees from Poly Haven (CC0): Dimitrios Savva, Charlotte Baglioni, Dario Barresi, Rico Cilliers, Rob Tuytel, Greg Zaal and Jarod Guest
 - three.js (MIT licence), PeerJS (MIT licence)
 
 All car, team and sponsor names in the game are fictional. Apex Grand Prix is not

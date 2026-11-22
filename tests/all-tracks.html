@@ -1,0 +1,17 @@
+﻿<!doctype html><html><body><pre id="out">pending</pre><script>
+// builds every circuit on High; reports errors, building counts, seats/people; screenshots a few. Silent.
+window.__shots={};const lines=[];const log=s=>{lines.push(s);document.getElementById('out').textContent=lines.join('\n');};
+const f=document.createElement('iframe');f.src='../index.html?mptest=1';f.style.cssText='width:1280px;height:720px;border:0';document.body.appendChild(f);
+const ev=js=>f.contentWindow.__mpEval(js);const wait=ms=>new Promise(r=>setTimeout(r,ms));
+f.onload=async()=>{try{await wait(7000);
+ ev("window.__errs=[];window.addEventListener('error',e=>__errs.push(String(e.message)));const ce=console.error;console.error=(...a)=>{__errs.push(a.map(String).join(' ').slice(0,200));ce(...a)};S.quality='high';applyQualityMaterials();S.timeOfDay='day';");
+ const n=+ev('TRACKS.length');const shootIds=['metro','ballarat','kestrel','nordhavn'];
+ for(let i=0;i<n;i++){const id=ev(`TRACKS[${i}].id`);const cls=ev(`TRACKS[${i}].kart?'kart':TRACKS[${i}].drift?'drift':'f1'`);
+   const e0=+ev('__errs.length');const t0=performance.now();
+   ev(`startRace({track:${i},cls:'${cls}',mode:'tt',seed:3,weather:'dry'});`);const ms=Math.round(performance.now()-t0);
+   const info=ev("(()=>{let inst=0,meshes=0;trackGroup.traverse(o=>{if(o.isMesh){meshes++;if(o.isInstancedMesh)inst+=o.count;}});return meshes+' meshes, '+inst+' instances';})()");
+   log(`${id.padEnd(9)} ${cls.padEnd(5)} built in ${ms} ms, ${info}, new errors ${+ev('__errs.length')-e0}`);
+   if(shootIds.includes(id)){await wait(4000);window.__shots[id]=ev("camMode='tv';for(let i=0;i<40;i++){updateCarVisuals(0);updateCamera(1);}renderFrame();renderFrame();renderer.domElement.toDataURL('image/jpeg',0.82)");}
+   ev('quitToMenu()');await wait(300);}
+ log('errors: '+ev('JSON.stringify(__errs.slice(0,6))'));}catch(e){log('ERR '+e.stack);}document.title='DONE';};
+</script></body></html>

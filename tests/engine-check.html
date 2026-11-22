@@ -1,0 +1,72 @@
+<!doctype html><html><body><pre id="out">pending</pre>
+<!-- Engine Workshop checks (run in real time, see run-engine-check.ps1):
+     every layout's figures and balance, firing frequency of the sound at several rpm, turbo + limiter,
+     save/load/install, and that a stock car drives exactly like before (compared with ?ref=<old copy of index.html>). -->
+<script>
+const Q = new URLSearchParams(location.search), out = document.getElementById('out');
+const lines = []; const log = s => { lines.push(s); out.textContent = lines.join('\n'); };
+const done = () => { document.title = 'DONE ' + lines.length; };
+const mk = src => { const f = document.createElement('iframe'); f.src = src; f.style.cssText = 'width:960px;height:540px;border:0'; document.body.appendChild(f); return f; };
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const A = mk('../index.html?mptest=1'), B = Q.get('ref') ? mk(Q.get('ref') + '?mptest=1') : null;
+const ev = (f, js) => f.contentWindow.__mpEval(js);
+let n = 0; [A, B].filter(Boolean).forEach(f => f.onload = () => { if (++n === (B ? 2 : 1)) run().catch(e => { log('ERR ' + e.stack); done(); }); });
+// drive a stock GT3 for 6 s of game time with full throttle (fixed seed, fixed steps) and report where it ends up
+const drive = f => ev(f, `(()=>{localStorage.removeItem('apexgp_engines_v1');if(typeof WSD!=='undefined'){WSD.installed={};}
+  startRace({track:0,cls:'touring',mode:'tt',seed:42,weather:'dry'});keys.add('ArrowUp');keys.add('KeyW');
+  for(let i=0;i<360;i++){pollInput(1/60);updateRace(1/60);}keys.clear();
+  return JSON.stringify({x:+player.x.toFixed(4),z:+player.z.toFixed(4),v:+player.speed.toFixed(4),g:player.gear});})()`);
+async function run() {
+  await wait(6000);
+  if (B) { const a = drive(A), b = drive(B); log('stock GT3 after 6 s, new: ' + a); log('stock GT3 after 6 s, old: ' + b); log(a === b ? 'STOCK PHYSICS IDENTICAL' : 'STOCK PHYSICS DIFFERENT'); ev(A,'quitToMenu()'); }
+  // 1. every preset / layout: figures, balance, estimate vs stock
+  log('== presets');
+  const pres = JSON.parse(ev(A, `JSON.stringify(WS_PRESETS.map(p=>{const cls=WS_FIT_CLS(p),c=wsCompile(p,cls),e=wsEstimate(p,cls),s=wsEstimate(null,cls);return{n:p.name,cls,hp:c.spec.hp,nm:c.spec.nm,bal:+c.rating.toFixed(3),t:e.t100,ts:s.t100,v:e.vmax,vs:s.vmax};}))`));
+  for (const p of pres) log(`${p.n.padEnd(18)} ${p.cls.padEnd(8)} ${String(p.hp).padStart(4)} hp ${String(p.nm).padStart(4)} Nm  balance ${p.bal}  0-100 ${p.t}s (stock ${p.ts})  top ${p.v} (stock ${p.vs})${p.bal < 0.879 || p.bal > 1.121 ? '  OUT OF BALANCE' : ''}`);
+  // extremes: smallest/biggest of every layout stay inside the cap
+  const ext = JSON.parse(ev(A, `JSON.stringify(Object.keys(WS_LAYOUTS).flatMap(k=>{const L=WS_LAYOUTS[k];return[0,1].map(m=>{const E=wsClamp({layout:k,disp:L.disp[m],maxRpm:L.rpm[m],turbo:L.turbo&&m===1,boost:2.5,exhaust:m?'race':'stock',tP:m?20:-20,tT:0,tE:0});const c=wsCompile(E,WS_FIT_CLS(E));return k+(m?' max':' min')+': '+c.spec.hp+'hp bal '+c.rating.toFixed(3);});}))`));
+  log('extremes: ' + ext.join(' | '));
+  // 2. sound: firing frequency at 3 rpm points per layout (magnitude at the firing frequency vs just below/above it)
+  log('== sound');
+  ev(A, 'unlockAudio();AU.ctx.resume();AU.master.gain.value=0;applyVolumes=()=>{};WSP.on=true;');
+  await wait(500);
+  for (const k of ['i4', 'i6', 'v6', 'v8', 'v10', 'v12', 'k2', 'k4']) {
+    const res = [];
+    for (const fr of [0.3, 0.6, 0.9]) {
+      ev(A, `(()=>{const L=WS_LAYOUTS['${k}'];const E=wsCompile(wsClamp({layout:'${k}',disp:(L.disp[0]+L.disp[1])/2,maxRpm:L.rpm[0],turbo:false,exhaust:'sport'}),WS_FIT_CLS({layout:'${k}'}));
+        window.__E=E;window.__rpm=E.idleR+(E.maxRpm-E.idleR)*${fr};const v=wsVoice(E);if(!window.__an){window.__an=AU.ctx.createAnalyser();window.__an.fftSize=16384;window.__an.smoothingTimeConstant=0;}try{v.out.disconnect(window.__an);}catch(e){}v.out.connect(window.__an);
+        clearInterval(window.__drv);window.__drv=setInterval(()=>wsDrive(v,E,window.__rpm,0.6,0.3,false,0),30);})()`);
+      await wait(700);
+      res.push(JSON.parse(ev(A, `(()=>{const an=window.__an,d=new Float32Array(an.frequencyBinCount);an.getFloatFrequencyData(d);const sr=AU.ctx.sampleRate,bin=sr/an.fftSize;
+        const E=window.__E,r=window.__rpm*(1-0.08*Math.pow(Math.min(1,window.__rpm/8000),2));const L=WS_LAYOUTS[E.layout];const ff=L.cyl===1?(L.two?r/60:r/120):r/120*L.cyl;
+        const mag=f=>{let m=-200;const b=Math.round(f/bin);for(let i=b-2;i<=b+2;i++)m=Math.max(m,d[i]||-200);return m;};
+        let pk=0,pv=-300;for(let i=Math.round(40/bin);i<Math.round(4000/bin);i++)if(d[i]>pv){pv=d[i];pk=i*bin;}const base=r/120;const h=pk/base,ok=Math.round(h)>=1&&Math.abs(h-Math.round(h))<0.12;return JSON.stringify({rpm:Math.round(window.__rpm),f:Math.round(ff),pk:Math.round(pk),h:+h.toFixed(2),ok,at:+mag(ff).toFixed(1)});})()`)));
+    }
+    ev(A, 'clearInterval(window.__drv);if(AU.wsV)AU.wsV.out.gain.value=0;');
+    log(k.padEnd(4) + res.map(r => `${r.rpm}rpm firing ${r.f}Hz, loudest ${r.pk}Hz = ${r.h}x cycle${r.ok ? ' OK' : ' ??'}`).join(' | '));
+  }
+  // 3. turbo whistle + rev limiter
+  ev(A, `(()=>{const E=wsCompile(WS_PRESETS[5],'f1');window.__E=E;const v=wsVoice(E);clearInterval(window.__drv);window.__drv=setInterval(()=>wsDrive(v,E,E.maxRpm*0.8,1,0.3,false,1),30);})()`);
+  await wait(500);
+  log('turbo whistle gain at full boost: ' + ev(A, 'AU.turbo.g.gain.value.toFixed(4)') + ', whistle ' + ev(A, 'Math.round(AU.turbo.o.frequency.value)') + ' Hz');
+  ev(A, `clearInterval(window.__drv);window.__g=[];const v=AU.wsV,E=window.__E;window.__drv=setInterval(()=>{wsDrive(v,E,E.limiter,1,0.3,true,0);window.__g.push(v.out.gain.value);},15)`);
+  await wait(800);
+  log('hard limiter: volume ranges ' + ev(A, 'Math.min(...__g.slice(10)).toFixed(3)+" to "+Math.max(...__g.slice(10)).toFixed(3)'));
+  ev(A, 'clearInterval(window.__drv);WSP.on=false;AU.wsV.out.gain.value=0;AU.turbo.g.gain.value=0;AU.turbo.wg.gain.value=0;');
+  // 4. workshop screen, save, load, install
+  log('== workshop');
+  ev(A, "localStorage.removeItem('apexgp_engines_v1');WSD={version:1,engines:[],installed:{}};wsOpen();");
+  log('screen: ' + ev(A, `document.querySelectorAll('#workshop .wsRow').length+' rows, '+document.querySelectorAll('#workshop .wsChip').length+' engine chips, dyno '+(!!document.getElementById('wsDyno'))+', on='+(curScreen==='workshop')`));
+  ev(A, `document.querySelector('[data-preset="1"]').click();document.querySelector('[data-act2="save"]').click();document.querySelector('[data-preset="0"]').click();document.querySelector('[data-act2="save"]').click();`);
+  log('saved: ' + ev(A, `JSON.parse(localStorage.getItem('apexgp_engines_v1')).engines.map(e=>e.name).join(', ')`));
+  ev(A, `WS_TAB='install';wsUI();document.querySelector('[data-inst="touring"]').click();document.querySelector('[data-inst="f1"]').click();`);
+  log('installed: ' + ev(A, `JSON.stringify(JSON.parse(localStorage.getItem('apexgp_engines_v1')).installed)`));
+  log('other saves untouched: ' + ev(A, `Object.keys(localStorage).filter(k=>/^apexgp/.test(k)).join(', ')`));
+  // 5. a race with the custom V8 in the GT3: engine fitted, boost builds, sound is the custom voice
+  ev(A, `wsBack();startRace({track:0,cls:'touring',mode:'tt',seed:42,weather:'dry'});keys.add('ArrowUp');for(let i=0;i<360;i++){pollInput(1/60);updateRace(1/60);}keys.clear();`);
+  log('race with custom engine: ' + ev(A, `'engine '+(player.ceng?player.ceng.name:'none')+', speed '+Math.round(player.speed*3.6)+' km/h after 6 s, gear '+player.gear+', boost '+(player.boost||0).toFixed(2)`));
+  ev(A, 'quitToMenu&&quitToMenu()');
+  // 6. stock car unchanged vs the previous version
+  done();
+}
+</script></body></html>

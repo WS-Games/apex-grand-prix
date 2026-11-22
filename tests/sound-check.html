@@ -1,0 +1,35 @@
+<!doctype html><html><body><pre id="out">pending</pre>
+<!-- Engine sound check per class, in real time: idle, full throttle (upshifts), lift (flames -> bangs), braking (downshifts).
+     Reports gear changes heard, shift cracks, downshift blips, exhaust bangs, and how much energy sits in the harsh 4-10 kHz band. -->
+<script>
+const out = document.getElementById('out'), lines = []; const log = s => { lines.push(s); out.textContent = lines.join('\n'); };
+const f = document.createElement('iframe'); f.src = '../index.html?mptest=1'; f.style.cssText = 'width:960px;height:540px;border:0'; document.body.appendChild(f);
+const ev = js => f.contentWindow.__mpEval(js); const wait = ms => new Promise(r => setTimeout(r, ms));
+f.onload = () => run().catch(e => { log('ERR ' + e.stack); document.title = 'DONE'; });
+async function run() {
+  await wait(6000);
+  ev(`unlockAudio();AU.ctx.resume();AU.master.gain.value=0;applyVolumes=()=>{};window.__c={bang:0,crack:0,blip:0};
+    exhaustBang=(f=>function(...a){__c.bang++;return f(...a)})(exhaustBang);shiftCrack=(f=>function(...a){__c.crack++;return f(...a)})(shiftCrack);
+    window.__an=AU.ctx.createAnalyser();__an.fftSize=8192;__an.smoothingTimeConstant=0;AU.engBus.connect(__an);
+    window.__drive=on=>{clearInterval(window.__dr);if(on)window.__dr=setInterval(()=>{for(let i=0;i<3;i++){pollInput(1/60);updateRace(1/60);}try{updateCarVisuals(0);}catch(e){}updateAudio();},50);};
+    window.__spec=()=>{const d=new Float32Array(__an.frequencyBinCount);__an.getFloatFrequencyData(d);const bin=AU.ctx.sampleRate/__an.fftSize;let lo=0,hi=0,c=0,s=0;
+      for(let i=1;i<d.length;i++){const f=i*bin,p=Math.pow(10,d[i]/10);if(f>100&&f<2000)lo+=p;if(f>4000&&f<10000)hi+=p;if(f<8000){c+=p*f;s+=p;}}return{harsh:10*Math.log10(hi/Math.max(1e-12,lo)),centre:Math.round(c/Math.max(1e-12,s)),level:10*Math.log10(s+1e-12)};};`);
+  for (const cls of ['f1', 'touring', 'street', 'kart', 'kart4']) {
+    ev(`window.__c={bang:0,crack:0,blip:0};startRace({track:${cls.startsWith('kart') ? "TRACKS.findIndex(t=>t.kart)" : 0},cls:'${cls}',mode:'tt',seed:7,weather:'dry'});keys.clear();__drive(true);`);
+    await wait(1500);
+    const idle = JSON.parse(ev('JSON.stringify(__spec())'));
+    ev("keys.add('ArrowUp');window.__g0=player.gear;window.__ups=0;window.__downs=0;window.__lg=player.gear;window.__blips=0;clearInterval(window.__mon);window.__mon=setInterval(()=>{if(player.gear>__lg)__ups++;else if(player.gear<__lg&&player.gear>0)__downs++;__lg=player.gear;if(blipT>0.08)__blips++;},16);");
+    let harsh = -99, centre = 0, maxRpm = 0;
+    for (let k = 0; k < 40; k++) { await wait(250); const s = JSON.parse(ev('JSON.stringify(__spec())')); harsh = Math.max(harsh, s.harsh); centre = Math.max(centre, s.centre); maxRpm = Math.max(maxRpm, +ev('Math.round(player.rpm)')); }
+    const top = ev("Math.round(player.speed*3.6)+' km/h gear '+player.gear");
+    ev("keys.delete('ArrowUp');"); await wait(900);
+    ev("keys.add('ArrowDown');"); await wait(2500); ev('keys.clear();');
+    const r = JSON.parse(ev('JSON.stringify({ups:__ups,downs:__downs,blips:__blips,bang:__c.bang,crack:__c.crack})'));
+    log(`${cls.padEnd(8)} idle centre ${idle.centre} Hz | full throttle: ${top}, max ${maxRpm} rpm, brightest ${centre} Hz, harsh band ${harsh.toFixed(1)} dB | upshifts ${r.ups} (cracks ${r.crack}) | downshifts ${r.downs} (blips ${r.blips > 0 ? 'yes' : 'no'}) | exhaust bangs ${r.bang}`);
+    ev('clearInterval(window.__mon);__drive(false);quitToMenu();');
+    await wait(600);
+  }
+  log('errors: ' + ev('(window.__errs||[]).length'));
+  document.title = 'DONE';
+}
+</script></body></html>

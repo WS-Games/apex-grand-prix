@@ -1,0 +1,20 @@
+<!doctype html><html><body><pre id="out">pending</pre>
+<!-- Graphics check: same view in the old (?ref) and new game at a chosen quality; screenshots + relative draw time. Silent. -->
+<script>
+const Q=new URLSearchParams(location.search),q=Q.get('q')||'high',out=document.getElementById('out');window.__shots={};
+const lines=[];const log=s=>{lines.push(s);out.textContent=lines.join('\n');};
+const mk=src=>{const f=document.createElement('iframe');f.src=src;f.style.cssText='width:1280px;height:720px;border:0';document.body.appendChild(f);return f;};
+const A=mk('../index.html?mptest=1'),B=Q.get('ref')?mk(Q.get('ref')+'?mptest=1'):null;const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const ev=(f,js)=>f.contentWindow.__mpEval(js);let n=0;[A,B].filter(Boolean).forEach(f=>f.onload=()=>{if(++n===(B?2:1))run().catch(e=>{log('ERR '+e.stack);document.title='DONE';});});
+async function shoot(f,tag,track,cam){ev(f,`S.quality='${q}';S.shadows={low:'off',medium:'medium',high:'high',ultra:'ultra'}['${q}'];applyShadows();applyQualityMaterials();S.timeOfDay='day';S.weather='dry';
+  startRace({track:${track},cls:'touring',mode:'tt',seed:3,weather:'dry'});keys.add('ArrowUp');for(let i=0;i<150;i++){pollInput(1/60);updateRace(1/60);}keys.clear();camMode='${cam}';`);
+  await wait(10000); // let textures and the sky photo load and every shader compile
+  const r=JSON.parse(ev(f,`(()=>{for(let i=0;i<30;i++){updateCarVisuals(0);updateCamera(1);renderFrame();}const ts=[];for(let i=0;i<30;i++){const a=performance.now();renderFrame();renderer.getContext().finish();ts.push(performance.now()-a);}ts.sort((x,y)=>x-y);const ms=ts[15];updateCamera(1);renderFrame();const url=renderer.domElement.toDataURL('image/jpeg',0.85);return JSON.stringify({ms:+ms.toFixed(1),url,real:!!(MAT.asphalt.userData&&MAT.asphalt.userData.real)});})()`));
+  window.__shots[tag]=r.url;return r;}
+async function run(){await wait(7000);
+  for(const [track,cam,name] of [[0,'chase','costa'],[3,'chase','kestrel']]){
+    const a=await shoot(A,'new_'+name,track,cam);log(`new ${name} ${q}: ${a.ms} ms/frame, real textures ${a.real}`);
+    if(B){const b=await shoot(B,'old_'+name,track,cam);log(`old ${name} ${q}: ${b.ms} ms/frame`);}
+    ev(A,'quitToMenu()');if(B)ev(B,'quitToMenu()');}
+  document.title='DONE';}
+</script></body></html>
