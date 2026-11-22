@@ -446,6 +446,8 @@ const KART_TRACKS=[
     [0,0],[80,0],[150,0],[185,15],[190,45],[165,62],[130,55],[100,62],[95,90],[120,108],[160,110],[180,130],[165,155],[120,158],[80,145],[60,120],[30,118],[10,140],[-25,145],[-50,125],[-45,95],[-15,80],[-10,55],[-40,40],[-55,18],[-35,2]]},
   {id:'k_west',name:'Westfield Kart Park',loc:'Westfield Karting',halfW:4.8,wall:8,kart:true,pits:false,points:[
     [0,0],[120,0],[230,5],[290,30],[300,75],[270,105],[220,110],[195,130],[200,160],[240,180],[280,200],[285,240],[250,260],[190,255],[150,235],[130,205],[100,195],[70,210],[40,240],[0,245],[-40,225],[-55,190],[-40,160],[-10,140],[0,110],[-20,80],[-55,60],[-70,30],[-50,5]]},
+  {id:'k_practice',name:'Practice Track',loc:'Beginner Practice Lap',halfW:5.5,wall:8,kart:true,pits:false,points:[
+    [437,342],[470,310],[510,275],[550,240],[582,224],[603,215],[606,198],[592,182],[572,148],[556,118],[564,88],[548,64],[518,64],[508,90],[528,121],[495,122],[450,102],[410,86],[386,100],[384,124],[410,138],[436,150],[441,178],[438,212],[446,240],[466,254],[486,238],[490,212],[520,214],[550,240],[585,268],[608,298],[606,322],[572,332],[538,320],[514,296],[486,281],[458,290],[450,315],[464,342],[478,372],[476,404],[446,414],[410,402],[386,408],[366,386],[352,352],[346,326],[366,314],[386,330],[392,352],[408,372],[425,356]].map(p=>[(p[0]-437)*0.9,(p[1]-342)*0.9])},
   // figure-eight kart track: the start straight dives under a 5 m bridge, the back section climbs over it
   {id:'k_cross',name:'Crossover Kart Park',loc:'Riverside Karting',halfW:4.5,wall:8,kart:true,pits:false,bridge:[[14,18]],points:[
     [-90,-62,0],[-50,-40,0],[0,0,0],[40,40,0],[78,70,0],[122,84,0],[160,70,0],[175,40,0],[160,15,0],[170,-12,0],[200,-30,0],[195,-62,0],[160,-75,0],[125,-62,0.5],
@@ -1911,7 +1913,7 @@ function buildScenery(){
    for(const dir of [1,-1]){const ad=new THREE.Mesh(new THREE.PlaneGeometry(wl+wr,1.5),MAT.adBoard);ad.position.set(m.x+p.tx*2.05*dir,gy+8.4,m.z+p.tz*2.05*dir);ad.rotation.y=dir>0?hd:hd+Math.PI;ad.userData.trk=true;trackGroup.add(ad);}}
   // --- trees (instanced)
   const {minx,maxx,minz,maxz}=t.bounds;const R=mulberry(77);const trees=[];
-  buildForest(t,near,R);const mm=new THREE.Matrix4(),q=new THREE.Quaternion(),sc=new THREE.Vector3();
+  if(!t.light)buildForest(t,near,R);const mm=new THREE.Matrix4(),q=new THREE.Quaternion(),sc=new THREE.Vector3();
   // --- bushes & rocks behind the barriers
   {const bush=[],rock=[];const R3=mulberry(31);for(let i=0;i<N;i+=Math.max(2,Math.round(3/QF()))){if(t.pitD(i*t.sp)<t.pitLen+30)continue;const side=R3()<0.5?1:-1;const w=side>0?t.wallL[i]:t.wallR[i];const o=side*(w+5+R3()*12);const x=t.px[i]+t.nx[i]*o,z=t.pz[i]+t.nz[i]*o;if(near(x,z,w+3))continue;(R3()<0.8?bush:rock).push([x,z,0.6+R3()*0.9,R3()*6]);}
    const bg=new THREE.IcosahedronGeometry(1.2,1);bg.translate(0,0.6,0);const rg=new THREE.DodecahedronGeometry(0.9,0);rg.translate(0,0.3,0);
@@ -3172,7 +3174,7 @@ function startRace(cfg={}){
   setClass(cls);
   rnd=mulberry(cfg.seed!=null?cfg.seed:((Date.now()&0xffff)+7));
   // rebuild track if needed (meshes and AI speed profile depend on the vehicle class)
-  if(!TR||TR.def!==TRACKS[tIdx]||TR.cls!==cls){TR=buildTrackData(TRACKS[tIdx]);TR.cls=cls;buildTrackMeshes();drawMinimapBase();}
+  if(!TR||TR.def!==TRACKS[tIdx]||TR.cls!==cls||TR.light){TR=buildTrackData(TRACKS[tIdx]);TR.cls=cls;buildTrackMeshes();drawMinimapBase();}
   applyTOD();
   for(const c of cars){scene.remove(c.mesh.root);c.mesh.root.traverse(o=>{if(o.material&&o.material.map&&o.material!==MAT.carbon&&o.material.isMeshBasicMaterial)o.material.map.dispose();});}
   cars=[];
@@ -3185,7 +3187,8 @@ function startRace(cfg={}){
   const d=cfg.aiDiff!=null?clamp(cfg.aiDiff+(S.aiDiff-70)*0.8,20,135):S.aiDiff;
   player=new Car(0,team,['You','YOU'],(cls==='mx'&&CAREER&&CAREER.series==='mx'&&CAREER.num)?CAREER.num:7,true);
   const ai=chosen.map((k,j)=>{const c=new Car(j+1,Math.floor(k/2),ROSTER[k],NUMS[k],false);c.base=(0.975+rnd()*0.025+(9-Math.floor(k/2))*0.0012)*((TIER[c.team.tier]||{s:1}).s);return c;});
-  for(const c of ai){c.skill=(0.78+0.22*Math.min(d,100)/100)*c.base+(d>100?(d-100)*0.0064:0);c.gripMul=d>100?1+(d-100)*0.008:1;c.powerMul=(0.92+0.08*Math.min(1,d/100))*(d>100?1+(d-100)*0.0024:1);if(d>=115)c.base=Math.max(c.base,0.99);c.tc=0.92;c.abs=true;c.noise=rnd()*1000;c.pers=driverPersonality(c);c.lapPace=1;c.paceLap=-9;c.errT=0;c.defT=0;c.defSide=0;/* level racecraft */const P=c.pers;if(d<60){P.err=Math.max(P.err,0.6)*1.8;P.cons=Math.min(P.cons,0.6);P.aggr*=0.5;P.def*=0.5;}else if(d>=115){P.err=0;P.cons=1;P.aggr=1;P.def=Math.max(P.def,0.9);P.brave=Math.max(P.brave,0.85);}else if(d>=100){P.err*=0.4;P.cons=Math.max(P.cons,0.9);P.def=Math.max(P.def,0.6);}}
+  for(const c of ai){const ecar=(cls==='touring'||cls==='street'||cls==='drift')?0.5:1; /* race cars and 90s cars: Death's extra grip/power bonuses are halved so it can be beaten without a far stronger car */
+    c.skill=(0.78+0.22*Math.min(d,100)/100)*c.base+(d>100?(d-100)*0.0064*ecar:0);c.gripMul=d>100?1+(d-100)*0.008*ecar:1;c.powerMul=(0.92+0.08*Math.min(1,d/100))*(d>100?1+(d-100)*0.0024*ecar:1);if(d>=115)c.base=Math.max(c.base,0.99);c.tc=0.92;c.abs=true;c.noise=rnd()*1000;c.pers=driverPersonality(c);c.lapPace=1;c.paceLap=-9;c.errT=0;c.defT=0;c.defSide=0;/* level racecraft */const P=c.pers;if(d<60){P.err=Math.max(P.err,0.6)*1.8;P.cons=Math.min(P.cons,0.6);P.aggr*=0.5;P.def*=0.5;}else if(d>=115){P.err=0;P.cons=1;P.aggr=1;P.def=Math.max(P.def,0.9);P.brave=Math.max(P.brave,0.85);}else if(d>=100){P.err*=0.4;P.cons=Math.max(P.cons,0.9);P.def=Math.max(P.def,0.6);}}
   for(const c of [player,...ai]){const tf=TIER[c.team.tier];if(tf)c.powerMul*=tf.p;c.voice=0.96+rnd()*0.08;c.basePow=c.powerMul;c.baseGrip=c.gripMul||1;}
   if(cls==='mx')player.num=CAREER&&CAREER.series==='mx'&&CAREER.num?CAREER.num:7;
   ai.sort((a,b)=>b.skill-a.skill+(rnd()-0.5)*0.01);
@@ -3678,11 +3681,12 @@ function paceTrack(r,dt){const p=player;if(!r.started||!p||p.finished||p.inPit||
   const last=r.pLastIdx==null?i:r.pLastIdx;r.pLastIdx=i;let k=last;let steps=0;while(k!==i&&steps<40){k=(k+1)%N;steps++;if(t.apex[k]&&p.surfMu>=0.9){const smp=clamp(p.vx/(t.vp[k]*gripScale(p)),0.75,1.7);r.pPace+=(smp-r.pPace)*(smp>r.pPace?0.35:0.12);r.pPace=clamp(r.pPace,0.82,1.7);}}}/* every level follows your pace, a fixed step apart, so each one is a race: Easy ~8% slower, Medium ~5%, Hard ~3%, Very Hard ~1.5%, Death level with you */
 function adaptPace(c,r){if(c.isPlayer||c.base==null||!isFinite(r.pPace))return c.skill||1;
   /* Easy: you should win by about 30 s; Medium about 3 s; Hard about 2 s; Very Hard dead level; Death a touch quicker but never overpowered */
-  const d=r.aiD,LV=d>=115?1.04:d>=100?1.012:d>=85?0.998:d>=60?0.988:0.93,CU=d>=115?0.06:d>=100?0.04:d>=85?0.03:d>=60?0.02:0.01;
+  const carCls=VCLASS==='touring'||VCLASS==='street'||VCLASS==='drift'; // Death on race cars / 90s cars: level with you, smaller catch-up
+  const d=r.aiD,LV=d>=115?(carCls?1.0:1.04):d>=100?1.012:d>=85?0.998:d>=60?0.988:0.93,CU=d>=115?(carCls?0.03:0.06):d>=100?0.04:d>=85?0.03:d>=60?0.02:0.01;
   let pace=r.pPace*LV*(1+(c.base-0.99)*0.5)*(c.rival?1.01:1);if(d<60)pace*=c.lapPace;
   let gap=progress(player)-progress(c);if(gap>TR.L/2)gap-=TR.L;if(gap<-TR.L/2)gap+=TR.L; /* + = you are ahead */
   if(gap>0)pace*=1+Math.min(CU,gap/600*CU);else pace*=1-Math.min(0.035,-gap/800*0.035);pace=Math.max(pace,0.8);
-  c.gripMul=c.baseGrip*Math.max(1.0,pace*pace*1.05);c.powerMul=c.basePow*clamp(Math.pow(pace,2.6)*1.03,0.85,1.5);return isFinite(pace)?pace:(c.skill||1);}
+  c.gripMul=c.baseGrip*Math.max(1.0,pace*pace*(carCls&&d>=115?1.0:1.05));c.powerMul=c.basePow*clamp(Math.pow(pace,2.6)*1.03,0.85,1.5);return isFinite(pace)?pace:(c.skill||1);}
 /* ---- rival: one driver near you on the grid is out to beat you every race (red name tag, harder racing) ---- */
 function pickRival(){if(!race||race.mode!=='gp'||!player)return;const ai=cars.filter(c=>!c.isPlayer);if(!ai.length)return;const k=cars.indexOf(player);
   const cand=cars[k-1]&&!cars[k-1].isPlayer?cars[k-1]:(cars[k+1]||ai[0]);for(const c of ai)c.rival=false;cand.rival=true;race.rival=cand;
@@ -3853,7 +3857,7 @@ function buildSettings(){
 // building a track takes a moment, so while you flick through circuits/classes the menu waits until you stop (no lag on every press)
 let menuRebuildT=null;
 function scheduleMenuRebuild(){clearTimeout(menuRebuildT);menuRebuildT=setTimeout(()=>{menuRebuildT=null;if(state!=='menu')return;const c=effCls();setClass(c);
-  if(!TR||TR.def!==TRACKS[S.track]||TR.cls!==c){TR=buildTrackData(TRACKS[S.track]);TR.cls=c;buildTrackMeshes();drawMinimapBase();}showMenuCars();},450);}
+  if(!TR||TR.def!==TRACKS[S.track]||TR.cls!==c){TR=buildTrackData(TRACKS[S.track]);TR.cls=c;TR.light=true;buildTrackMeshes();drawMinimapBase();}showMenuCars();},450);}
 function buildSetup(){
   $('setupTitle').textContent=S.mode==='tt'?'Time Trial':'Quick Race';
   const rows=$('setupRows');rows.innerHTML='';
@@ -3868,7 +3872,7 @@ function onSetting(k){
   if(k==='shadows')applyShadows();
   if(k==='quality'){const q=S.quality;S.shadows={low:'off',medium:'medium',high:'high',ultra:'ultra'}[q];S.resScale={low:70,medium:85,high:100,ultra:100}[q];saveS();applyShadows();applyRes();applyQualityMaterials();
     if(curScreen==='settings'){const fi=focusIdx;buildSettings();focusIdx=fi;updateFocus();}
-    if(state==='menu'&&TR){TR=buildTrackData(TR.def);TR.cls=VCLASS;buildTrackMeshes();drawMinimapBase();showMenuCars();}}
+    if(state==='menu'&&TR){TR=buildTrackData(TR.def);TR.cls=VCLASS;TR.light=true;buildTrackMeshes();drawMinimapBase();showMenuCars();}}
   if(k==='resScale')applyRes();
   if(k==='timeOfDay'||k==='weather')applyTOD();
   if(['master','engine','sfx'].includes(k))applyVolumes();

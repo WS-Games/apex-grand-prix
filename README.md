@@ -1,4 +1,4 @@
-<div align="center">
+﻿<div align="center">
 
 <img src="icon-192.png" width="96" alt="Apex Grand Prix icon">
 
@@ -29,7 +29,14 @@ Open-wheelers, V8 touring cars, turbo street cars and go-karts. Nine tracks (inc
 
 Plug in an **Xbox or PlayStation controller** at any time — it's picked up automatically (with vibration).
 
-## 🆕 New in v1.9.2 (computers only)
+## 🆕 New in v1.9.3
+
+![Practice Track](docs/screenshots/practice-track.jpg)
+
+- **Practice Track (karts):** a new relaxed kart circuit with 13 turns and a crossing in the middle, shaped like the practice map. Wide road, good for new players.
+- **No more freezing when switching maps:** flicking through circuits and classes in the menu no longer builds the whole forest each time. The full scenery loads when you start the race.
+- **Death mode is fairer in race cars and 90s cars:** the computer drivers get a much smaller grip and power boost in touring, GT3 and 90s cars. F1 and karts are unchanged.
+## New in v1.9.2 (computers only)
 
 - **GT3 rebuilt**: the GT3 race car now uses a much more detailed model on computers (the torn rear bumper, crumpled panels and distorted rear lights are fixed). Same size, same handling. Phones and the Android app keep the original lighter model.
 
