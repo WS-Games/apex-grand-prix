@@ -3774,7 +3774,7 @@ function updateHUD(dt){
 let curScreen=null,focusIdx=0,setTab=0,settingsReturn='main';
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id));{const cr=document.getElementById('copyr');if(cr)cr.style.display=id?'':'none';}curScreen=id;focusIdx=0;updateFocus();
   const hints=$('hints');if(!id){hints.innerHTML='';$('padInd').style.display='none';return;}$('padInd').style.display='block';
-  hints.innerHTML=id==='splash'?'':'<span><b class="bA">A</b>Select</span><span><b class="bB">B</b>Back</span>'+(id==='settings'||id==='road'?'<span><b class="bX" style="width:auto;padding:0 6px;border-radius:5px">LB/RB</b>Tabs</span>':'')+'<span><b class="bY" style="width:auto;padding:0 6px;border-radius:5px">◀▶</b>Change</span>';}
+  hints.innerHTML='';}
 /* ---- hover previews: the circuit map or the car appears on the right while that row is selected ---- */
 let PV=null;const PV_CAR={};
 function pvEl(){if(PV)return PV;PV=document.createElement('div');PV.id='pview';PV.style.cssText='position:fixed;right:3vw;top:20vh;width:min(440px,38vw);background:rgba(8,10,16,.78);border:1px solid rgba(255,255,255,.12);border-left:4px solid #ff3b30;border-radius:10px;padding:12px 14px;color:#fff;font-family:"Exo 2",system-ui;z-index:30;pointer-events:none;display:none';
@@ -4518,8 +4518,8 @@ function mpBuild(){const body=$('mpBody');if(!body)return;body.innerHTML='';cons
     body.appendChild(st);btn('Refresh',()=>mpBrowseStart());btn('Back',()=>{mpBrowseStop();MP.view='home';mpBuild();});}
   else if(MP.view==='home'){$('mpSub').textContent='RACE UP TO '+(MP_MAX-1)+' OTHER PLAYERS ONLINE · COMPUTER OR PHONE';
     note('Your name:');const ni=input('Your name',MP.name,14);ni.onchange=()=>{MP.name=ni.value.trim()||'Player';S.mpName=MP.name;saveS();};
-    btn('Create race<small>You get a room code to send to your friends (up to '+MP_MAX+' players). You choose the track, car and laps.</small>',()=>{MP.name=ni.value.trim()||'Player';S.mpName=MP.name;saveS();mpHost();});
-    btn('Public: '+(S.mpPublic===false?'OFF (private, code only)':'ON (listed in Public Servers)')+'<small>Click to change. Public rooms show up in the server list so anyone can join.</small>',()=>{S.mpPublic=S.mpPublic===false;saveS();mpBuild();});
+    btn('Create private race<small>Only people you send the room code to can join (up to '+MP_MAX+' players). You choose the track, car and laps.</small>',()=>{MP.name=ni.value.trim()||'Player';S.mpName=MP.name;S.mpPublic=false;saveS();mpHost();});
+    btn('Create public race<small>Listed in Public Servers so anyone can join, and you can still share the code.</small>',()=>{MP.name=ni.value.trim()||'Player';S.mpName=MP.name;S.mpPublic=true;saveS();mpHost();});
     btn('Browse public servers<small>See open races and join one.</small>',()=>{MP.name=ni.value.trim()||'Player';S.mpName=MP.name;saveS();MP.view='browse';mpBrowseStart();mpBuild();});
     note('Have a code? Type it here:');const ci=input('Room code',MP.code&&MP.role!=='host'?MP.code:'',5);
     btn('Join race<small>Join your friend with their room code.</small>',()=>{MP.name=ni.value.trim()||'Player';S.mpName=MP.name;saveS();const c=ci.value.trim().toUpperCase();if(c.length<4){mpSetStatus('Type the room code first.');return;}mpJoin(c);});

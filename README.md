@@ -29,7 +29,11 @@ Open-wheelers, V8 touring cars, turbo street cars and go-karts. Nine tracks (inc
 
 Plug in an **Xbox or PlayStation controller** at any time — it's picked up automatically (with vibration).
 
-## 🆕 New in v1.9.4
+## 🆕 New in v1.9.5
+
+- **Private and public races are separate buttons:** Multiplayer now has "Create private race" (code only, not listed) and "Create public race" (listed in Public Servers). Joining by room code still works.
+- **Cleaner menus:** the A / B / Change button hints at the bottom right are gone.
+## New in v1.9.4
 
 ![Public servers](docs/screenshots/public-servers.jpg)
 
