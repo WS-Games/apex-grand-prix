@@ -29,7 +29,13 @@ Open-wheelers, V8 touring cars, turbo street cars and go-karts. Nine tracks (inc
 
 Plug in an **Xbox or PlayStation controller** at any time — it's picked up automatically (with vibration).
 
-## 🆕 New in v1.9.3
+## 🆕 New in v1.9.4
+
+![Public servers](docs/screenshots/public-servers.jpg)
+
+- **Public servers:** anyone can create or join an open online race. Multiplayer → Create race lists your room publicly (switch "Public" off for code-only rooms). Multiplayer → Browse public servers shows host, track, car, laps and player count; click one to join. Full or started races are greyed out, and rooms disappear when the host leaves.
+- Rooms are announced through free public MQTT servers (no account or server of ours). Only the room code, host name, track, car class, laps and player count are published. Racing itself is still direct between players, up to 10.
+## New in v1.9.3
 
 ![Practice Track](docs/screenshots/practice-track.jpg)
 

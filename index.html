@@ -4457,20 +4457,70 @@ if(/[?&]mptest/.test(location.search))window.__mpEval=s=>eval(s);
 window.addEventListener('message',e=>{const d=e.data;if(!MP.local||!d||!d.apexmp||d.from===MP.myId)return;if(d.to!=='*'&&d.to!==MP.myId)return;mpOnMsg(d.msg,d.from);});
 function mpSetStatus(t){MP.status=t;const el=document.getElementById('mpStatus');if(el)el.textContent=t;}
 function mpOpen(){if(!MP.name)MP.name=(S.mpName||'Player');showScreen('mp');mpBuild();}
-function mpBackKey(){if(MP.view==='lobby')mpLeave();else showScreen('main');}
+function mpBackKey(){if(MP.view==='lobby')mpLeave();else if(MP.view==='browse'){mpBrowseStop();MP.view='home';mpBuild();}else showScreen('main');}
 function mpDefaultCfg(){const c=effCls();const cls=MP_CLASSES.find(x=>x[0]===c)?c:'f1';let tr=S.track;const want=isKart(cls);if(!TRACKS[tr]||!!TRACKS[tr].kart!==want||TRACKS[tr].drift)tr=TRACKS.findIndex(t=>!!t.kart===want&&!t.drift);return{track:tr,cls,laps:Math.min(10,Math.max(1,S.laps||3))};}
 const mpMe=()=>MP.players.find(p=>p.id===MP.myId);
 const mpName=id=>{const p=MP.players.find(x=>x.id===id);return p?p.name:'Player';};
 function mpAllReady(){return MP.players.length>=2&&MP.players.every(p=>p.ready);}
-function mpBuild(){const body=$('mpBody');if(!body)return;body.innerHTML='';
+/* ---- public server list: rooms are announced on free public MQTT brokers (over WebSocket), so no server of ours is needed.
+   The announcement holds only: room code, host name, track, car class, laps, player count. A "last will" removes it if the host disappears. ---- */
+const PUB={brokers:['wss://broker.hivemq.com:8884/mqtt','wss://broker.emqx.io:8084/mqtt','wss://test.mosquitto.org:8081'],topic:'apexgp/v1/rooms/'};
+function pubMqtt(o){const enc=new TextEncoder(),dec=new TextDecoder();
+  const str=s=>{const b=enc.encode(s);return[b.length>>8,b.length&255,...b];};
+  const vl=n=>{const r=[];do{let d=n%128;n=Math.floor(n/128);if(n>0)d|=128;r.push(d);}while(n>0);return r;};
+  const pkt=(h,body)=>{const a=new Uint8Array(1+vl(body.length).length+body.length);a.set([h,...vl(body.length)]);a.set(body,a.length-body.length);return a;};
+  const api={ready:false,closed:false};let ws=null,buf=new Uint8Array(0),ping=null,bi=0;
+  const send=a=>{if(ws&&ws.readyState===1)ws.send(a);};
+  api.pub=(topic,payload,retain)=>send(pkt(0x30|(retain?1:0),[...str(topic),...enc.encode(payload)]));
+  api.sub=f=>send(pkt(0x82,[0,1,...str(f),0]));
+  api.close=()=>{api.closed=true;clearInterval(ping);try{ws&&ws.close();}catch(e){}};
+  const parse=()=>{while(buf.length>=2){let m=1,n=0,i=1,b;do{if(i>=buf.length)return;b=buf[i++];n+=(b&127)*m;m*=128;}while(b&128);if(buf.length<i+n)return;
+    const h=buf[0],body=buf.slice(i,i+n);buf=buf.slice(i+n);const ty=h>>4;
+    if(ty===2){if(body[1]===0){api.ready=true;ping=setInterval(()=>send(new Uint8Array([0xC0,0])),25000);o.onready&&o.onready(api);}else tryNext();}
+    else if(ty===3){const tl=body[0]<<8|body[1];const topic=dec.decode(body.slice(2,2+tl));o.onmsg&&o.onmsg(topic,dec.decode(body.slice(2+tl)));}}};
+  const tryNext=()=>{if(api.closed)return;try{ws&&(ws.onclose=null,ws.close());}catch(e){}clearInterval(ping);api.ready=false;
+    if(bi>=PUB.brokers.length){o.onfail&&o.onfail();return;}
+    let w;try{w=new WebSocket(PUB.brokers[bi++],'mqtt');}catch(e){tryNext();return;}ws=w;w.binaryType='arraybuffer';buf=new Uint8Array(0);
+    const to=setTimeout(()=>{if(!api.ready)tryNext();},5000);
+    w.onopen=()=>{const id='apexgp'+Math.random().toString(36).slice(2,10);let fl=0x02,pl=[...str(id)];
+      if(o.willTopic){fl|=0x04|0x20;pl=pl.concat(str(o.willTopic),[0,0]);}
+      send(pkt(0x10,[0,4,77,81,84,84,4,fl,0,30,...pl]));};
+    w.onmessage=e=>{const a=new Uint8Array(e.data);const t=new Uint8Array(buf.length+a.length);t.set(buf);t.set(a,buf.length);buf=t;parse();};
+    w.onerror=()=>{};w.onclose=()=>{clearTimeout(to);if(!api.closed){if(api.ready){api.ready=false;o.onlost&&o.onlost();}else tryNext();}};};
+  tryNext();return api;}
+/* host side */
+function mpPubInfo(){const cfg=MP.cfg||{},t=TRACKS[cfg.track];return JSON.stringify({c:MP.code,h:MP.name,t:t?t.id:'',k:cfg.cls,l:cfg.laps,n:MP.players.length,m:MP_MAX,r:MP.inRace?1:0});}
+function mpPubUpdate(){if(!MP.pubC||!MP.pubC.ready)return;MP.pubC.pub(PUB.topic+MP.code,mpPubInfo(),true);}
+function mpPubStart(){if(MP.local||MP.role!=='host'||S.mpPublic===false)return;mpPubStop();const code=MP.code;
+  const mk=()=>{MP.pubC=pubMqtt({willTopic:PUB.topic+code,onready:()=>mpPubUpdate(),onlost:()=>{if(MP.role==='host'&&MP.code===code&&!MP.leaving)setTimeout(mk,3000);},onfail:()=>{}});};mk();
+  clearInterval(MP.pubT);MP.pubT=setInterval(mpPubUpdate,20000);}
+function mpPubStop(){clearInterval(MP.pubT);const c=MP.pubC;MP.pubC=null;if(c){try{if(c.ready&&MP.code)c.pub(PUB.topic+MP.code,'',true);}catch(e){}setTimeout(()=>c.close(),300);}}
+/* browser side */
+function mpBrowseStart(){mpBrowseStop();MP.rooms={};MP.browseState='connecting';
+  MP.browseC=pubMqtt({onready:c=>{MP.browseState='ok';c.sub(PUB.topic+'+');mpBrowseRefresh();},onfail:()=>{MP.browseState='fail';mpBrowseRefresh();},onlost:()=>{MP.browseState='fail';mpBrowseRefresh();},
+    onmsg:(t,p)=>{const code=t.slice(PUB.topic.length);if(!p){delete MP.rooms[code];}else{try{const r=JSON.parse(p);if(r&&r.c)MP.rooms[code]=r;}catch(e){}}mpBrowseRefresh();}});}
+function mpBrowseStop(){const c=MP.browseC;MP.browseC=null;clearTimeout(MP.browseT);if(c)c.close();}
+function mpBrowseRefresh(){clearTimeout(MP.browseT);MP.browseT=setTimeout(()=>{if(MP.view==='browse'&&curScreen==='mp')mpBuild();},250);}
+function mpBuild(){const body=$('mpBody');if(!body)return;body.innerHTML='';const fi0=focusIdx;
   const hover=d=>{d.onmouseenter=()=>{const f=focusables();const i=f.indexOf(d);if(i>=0){focusIdx=i;updateFocus();}};};
   const btn=(html,fn,dim)=>{const d=document.createElement('div');d.className='menu-btn fc';d.innerHTML=html;d.style.fontSize='19px';if(dim)d.style.opacity='0.45';d.onclick=dim?()=>{}:fn;hover(d);body.appendChild(d);return d;};
   const note=h=>{const d=document.createElement('div');d.className='desc';d.style.margin='4px 0 8px';d.innerHTML=h;body.appendChild(d);return d;};
   const input=(ph,val,max)=>{const i=document.createElement('input');i.placeholder=ph;i.value=val||'';i.maxLength=max||16;i.style.cssText='font:700 20px "Exo 2",system-ui;padding:10px 14px;margin:6px 0;width:min(420px,90%);background:rgba(0,0,0,.45);color:#fff;border:2px solid rgba(255,255,255,.25);border-radius:6px;text-transform:'+(max===5?'uppercase':'none');i.onkeydown=e=>e.stopPropagation();body.appendChild(i);return i;};
   const st=document.createElement('div');st.id='mpStatus';st.className='desc';st.style.cssText='margin:8px 0;color:#ffcc00;font-weight:700';st.textContent=MP.status||'';
-  if(MP.view==='home'){$('mpSub').textContent='RACE UP TO '+(MP_MAX-1)+' FRIENDS ONLINE · COMPUTER OR PHONE';
+  if(MP.view==='browse'){$('mpSub').textContent='PUBLIC SERVERS · ANYONE CAN JOIN';
+    const rs=Object.values(MP.rooms||{});const bs=MP.browseState;
+    if(bs==='connecting')note('Looking for servers…');else if(bs==='fail')note('Could not reach the server list (are you online?). Try Refresh.');
+    else if(!rs.length)note('No public servers right now. Go back and create one, and others will see it here.');
+    rs.sort((a,b)=>(a.r-b.r)||(b.n-a.n));
+    for(const r of rs){const tr=TRACKS.find(t=>t.id===r.t),cn=(MP_CLASSES.find(x=>x[0]===r.k)||[0,r.k])[1];const full=r.n>=r.m,busy=!!r.r;
+      const nm=String(r.h||'Player').replace(/[<>&]/g,'');
+      btn(`${nm}'s race<small>${tr?tr.name:'?'} · ${cn} · ${r.l} laps · ${r.n}/${r.m} players${busy?' · RACE IN PROGRESS':''}${full?' · FULL':''}</small>`,()=>{MP.name=MP.name||'Player';mpBrowseStop();mpJoin(String(r.c).toUpperCase().slice(0,5));},full||busy);}
+    body.appendChild(st);btn('Refresh',()=>mpBrowseStart());btn('Back',()=>{mpBrowseStop();MP.view='home';mpBuild();});}
+  else if(MP.view==='home'){$('mpSub').textContent='RACE UP TO '+(MP_MAX-1)+' OTHER PLAYERS ONLINE · COMPUTER OR PHONE';
     note('Your name:');const ni=input('Your name',MP.name,14);ni.onchange=()=>{MP.name=ni.value.trim()||'Player';S.mpName=MP.name;saveS();};
     btn('Create race<small>You get a room code to send to your friends (up to '+MP_MAX+' players). You choose the track, car and laps.</small>',()=>{MP.name=ni.value.trim()||'Player';S.mpName=MP.name;saveS();mpHost();});
+    btn('Public: '+(S.mpPublic===false?'OFF (private, code only)':'ON (listed in Public Servers)')+'<small>Click to change. Public rooms show up in the server list so anyone can join.</small>',()=>{S.mpPublic=S.mpPublic===false;saveS();mpBuild();});
+    btn('Browse public servers<small>See open races and join one.</small>',()=>{MP.name=ni.value.trim()||'Player';S.mpName=MP.name;saveS();MP.view='browse';mpBrowseStart();mpBuild();});
     note('Have a code? Type it here:');const ci=input('Room code',MP.code&&MP.role!=='host'?MP.code:'',5);
     btn('Join race<small>Join your friend with their room code.</small>',()=>{MP.name=ni.value.trim()||'Player';S.mpName=MP.name;saveS();const c=ci.value.trim().toUpperCase();if(c.length<4){mpSetStatus('Type the room code first.');return;}mpJoin(c);});
     body.appendChild(st);btn('Back',()=>showScreen('main'));}
@@ -4487,10 +4537,10 @@ function mpBuild(){const body=$('mpBody');if(!body)return;body.innerHTML='';
     btn(MP.ready?'✓ Ready (click to cancel)':'Ready',()=>{MP.ready=!MP.ready;if(host){const me=mpMe();if(me)me.ready=MP.ready;mpLobbyChanged();}else{mpSend({t:'ready',v:MP.ready});const me=mpMe();if(me)me.ready=MP.ready;mpBuild();}});
     if(host){const ok=mpAllReady();btn('▶ Start race'+(ok?'':'<small>Everyone must be ready (at least 2 players)</small>'),()=>mpStartRace(),!ok);}
     body.appendChild(st);btn('Leave',()=>mpLeave());}
-  focusIdx=0;updateFocus();}
+  focusIdx=MP.view==='browse'?Math.max(0,Math.min(fi0,focusables().length-1)):0;updateFocus();}
 /* host: send the lobby (players, settings) to everyone */
 function mpLobbyChanged(){if(MP.role==='host'){if(!MP.cfg)MP.cfg=mpDefaultCfg();const me=mpMe();if(me){me.name=MP.name;me.ready=MP.ready;}
-  mpSend({t:'lobby',cfg:MP.cfg,players:MP.players});}if(curScreen==='mp')mpBuild();}
+  mpSend({t:'lobby',cfg:MP.cfg,players:MP.players});mpPubUpdate();}if(curScreen==='mp')mpBuild();}
 function mpHostAddPlayer(id,name){let p=MP.players.find(x=>x.id===id);if(!p){p={id,name:name||'Guest',ready:false};MP.players.push(p);}else{p.name=name||p.name;}delete MP.left[id];return p;}
 function mpHostDropPlayer(id,why){const p=MP.players.find(x=>x.id===id);if(!p)return;
   if(MP.inRace){MP.left[id]=true;mpSend({t:'left',id});if(state==='race')showMsg(p.name.toUpperCase()+' '+(why||'LEFT'),2.5,true,'#ff5a4f');}
@@ -4500,7 +4550,7 @@ async function mpHost(){mpReset();MP.role='host';MP.myId='h';MP.code=mpCodeGen()
   if(MP.local){mpSetStatus('Room ready (local test). Waiting for friends…');return;}
   try{await mpLoadPeer();}catch(e){mpSetStatus(e.message);return;}
   MP.peer=new Peer('apexgp-'+MP.code);
-  MP.peer.on('open',()=>mpSetStatus('Room ready. Send the code to your friends.'));
+  MP.peer.on('open',()=>{mpSetStatus(S.mpPublic===false?'Room ready. Send the code to your friends.':'Room ready and listed in Public Servers. Anyone can join.');mpPubStart();});
   MP.peer.on('connection',c=>{const md=c.metadata||{};const id=md.id||c.peer;
     c.on('open',()=>{const known=MP.players.some(p=>p.id===id);
       if(!known&&(MP.players.length>=MP_MAX||(MP.inRace&&!MP.players.some(p=>p.id===id)))){c.send({t:'full',why:MP.inRace?'race':'full'});setTimeout(()=>c.close(),400);return;}
@@ -4528,7 +4578,7 @@ function mpConnectGuest(){if(!MP.peer||MP.leaving)return;
 function mpReset(){MP.leaving=false;MP.players=[];MP.ready=false;MP.inRace=false;MP.result=null;MP.rematchReq={};MP.reconnecting=false;MP.order=[];MP.remotes={};MP.snaps={};MP.lastRecv={};MP.left={};MP.jit={};MP.conns={};MP.conn=null;MP.sconn=null;
   clearInterval(MP.retryT);MP.retryT=null;MP.pingT&&clearInterval(MP.pingT);
   MP.pingT=setInterval(()=>mpSend({t:'ping',at:performance.now()}),2000);}
-function mpCloseAll(){try{MP.conn&&MP.conn.close();}catch(e){}try{MP.sconn&&MP.sconn.close();}catch(e){}for(const k of Object.values(MP.conns)){try{k.ctl&&k.ctl.close();k.st&&k.st.close();}catch(e){}}try{MP.peer&&MP.peer.destroy();}catch(e){}MP.conn=null;MP.sconn=null;MP.conns={};MP.peer=null;}
+function mpCloseAll(){mpPubStop();mpBrowseStop();try{MP.conn&&MP.conn.close();}catch(e){}try{MP.sconn&&MP.sconn.close();}catch(e){}for(const k of Object.values(MP.conns)){try{k.ctl&&k.ctl.close();k.st&&k.st.close();}catch(e){}}try{MP.peer&&MP.peer.destroy();}catch(e){}MP.conn=null;MP.sconn=null;MP.conns={};MP.peer=null;}
 function mpLeave(){MP.leaving=true;mpSend({t:'bye'});setTimeout(mpCloseAll,150);clearInterval(MP.pingT);clearInterval(MP.retryT);MP.view='home';MP.role=null;mpSetStatus('');if(state==='race'||state==='paused'||state==='results'){MP.inRace=false;if(race)race.mp=false;quitToMenu();}mpOpen();}
 function mpOnClose(){if(MP.leaving||MP.role!=='guest')return;MP.conn=null;MP.sconn=null;
   mpSetStatus('Connection lost — reconnecting…');MP.reconnecting=true;let tries=0;clearInterval(MP.retryT);
@@ -4561,7 +4611,7 @@ function mpStartRace(){if(MP.role!=='host'||!mpAllReady())return;const seed=Math
   // grid: host on pole, then players in the order they joined
   const order=MP.players.map(p=>p.id);mpSend({t:'start',cfg,seed,order,players:MP.players});
   const delay=Math.min(400,Math.max(0,MP.rtt/2));setTimeout(()=>mpBeginRace(cfg,seed,order),delay);}
-function mpBeginRace(cfg,seed,order){MP.inRace=true;MP.order=order||MP.players.map(p=>p.id);MP.snaps={};MP.lastRecv={};MP.left={};MP.result=null;MP.rematchReq={};MP.ready=false;for(const p of MP.players)p.ready=false;MP.sendN=0;
+function mpBeginRace(cfg,seed,order){MP.inRace=true;mpPubUpdate();MP.order=order||MP.players.map(p=>p.id);MP.snaps={};MP.lastRecv={};MP.left={};MP.result=null;MP.rematchReq={};MP.ready=false;for(const p of MP.players)p.ready=false;MP.sendN=0;
   const slot=Math.max(0,MP.order.indexOf(MP.myId));
   startRace({track:cfg.track,cls:cfg.cls,laps:cfg.laps,aiCount:MP.order.length-1,gridSlot:slot,mode:'gp',seed,mp:true,weather:'dry'});}
 /* every other car on the grid is one of the other players, in grid order */
@@ -4608,7 +4658,7 @@ function mpRematch(){if(MP.role==='host'){for(const p of MP.players)p.ready=true
     mpSend({t:'start',cfg:MP.cfg,seed,order,players:MP.players});const delay=Math.min(400,Math.max(0,MP.rtt/2));mpUnhookResults();setTimeout(()=>mpBeginRace(MP.cfg,seed,order),delay);}
   else{MP.rematchReq[MP.myId]=true;mpSend({t:'rematch'});mpResultsButtons();mpSetStatus('Asked the host for a rematch…');}}
 function mpUnhookResults(){MP.resultsActive=false;}
-function mpToLobby(fromHost){mpUnhookResults();if(MP.role==='host'&&!fromHost){MP.players=MP.players.filter(p=>!MP.left[p.id]);mpSend({t:'toLobby'});}MP.inRace=false;MP.ready=false;for(const p of MP.players)p.ready=false;if(race)race.mp=false;if(state!=='menu')quitToMenu();MP.view='lobby';showScreen('mp');mpLobbyChanged();}
+function mpToLobby(fromHost){mpUnhookResults();if(MP.role==='host'&&!fromHost){MP.players=MP.players.filter(p=>!MP.left[p.id]);mpSend({t:'toLobby'});}MP.inRace=false;mpPubUpdate();MP.ready=false;for(const p of MP.players)p.ready=false;if(race)race.mp=false;if(state!=='menu')quitToMenu();MP.view='lobby';showScreen('mp');mpLobbyChanged();}
 function mpQuitRace(){mpSend({t:'bye'});MP.inRace=false;race.mp=false;mpUnhookResults();quitToMenu();MP.leaving=true;mpCloseAll();MP.view='home';MP.role=null;mpOpen();}
 function showResults(){
   if(race&&race.mp){mpResults();return;}
