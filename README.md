@@ -29,6 +29,10 @@ Open-wheelers, V8 touring cars, turbo street cars and go-karts. Nine tracks (inc
 
 Plug in an **Xbox or PlayStation controller** at any time — it's picked up automatically (with vibration).
 
+## 🆕 New in v1.9.2 (computers only)
+
+- **GT3 rebuilt**: the GT3 race car now uses a much more detailed model on computers (the torn rear bumper, crumpled panels and distorted rear lights are fixed). Same size, same handling. Phones and the Android app keep the original lighter model.
+
 ## 🆕 New in v1.9.1 (computers only)
 
 - **Much better graphics on PC**: real photo-scanned track surfaces (asphalt, grass, gravel, concrete), realistic sky reflections, and detailed buildings on all 17 circuits: stepped grandstands with individual seats and spectators, steel-roofed stands, pit garages with roller doors and a glass hospitality level, and a race control tower. Each circuit has its own colours and building styles.

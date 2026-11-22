@@ -336,6 +336,7 @@ body.touchdev .hints,body.touchdev #padInd{display:none!important}
 {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
 </script>
 <script src="sounds.js"></script>
+<script>if(!/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)&&!(window.matchMedia&&matchMedia("(pointer:coarse)").matches)&&!/[?&]pcgfx=0/.test(location.search))document.write("<script src=\"models-hq.js\"><\/script>");</script>
 <script src="models.js"></script>
 <script src="models-scenery.js"></script>
 <script src="models-jdm.js"></script>
@@ -2176,7 +2177,7 @@ const MODELS={};
 let JDM_TEX=null;
 (function loadJDM(){const M=window.APEX_JDM;if(!M)return;const L=new GLTFLoader();try{const img=new Image();img.src='data:image/png;base64,'+M.supraTex;JDM_TEX=new THREE.Texture(img);JDM_TEX.flipY=true;JDM_TEX.colorSpace=THREE.SRGBColorSpace;JDM_TEX.anisotropy=4;img.onload=()=>{JDM_TEX.needsUpdate=true;};}catch(e){}
   for(const k of ['supra','s14']){if(!M[k])continue;try{const bin=Uint8Array.from(atob(M[k]),ch=>ch.charCodeAt(0)).buffer;L.parse(bin,'',g=>{const get=n=>g.scene.getObjectByName(n);const t={BODY:get('BODY'),LOD:get('BODY_LOD1'),W:{FL:get('WFL'),FR:get('WFR'),RL:get('WRL'),RR:get('WRR')}};if(t.BODY&&t.W.FL&&t.W.RL)MODELS[k]=t;},e=>console.warn('jdm '+k,e));}catch(e){console.warn('jdm',e);}}})();
-(function loadModels(){const M=window.APEX_MODELS;if(!M)return;const L=new GLTFLoader();
+(function loadModels(){const M=window.APEX_MODELS?Object.assign({},window.APEX_MODELS,PC_GFX&&window.APEX_MODELS_HQ?window.APEX_MODELS_HQ:{}):null;if(!M)return;const L=new GLTFLoader();
   for(const k of Object.keys(M)){try{const bin=Uint8Array.from(atob(M[k]),ch=>ch.charCodeAt(0)).buffer;
     L.parse(bin,'',g=>{const get=n=>g.scene.getObjectByName(n);const t={BODY:get('BODY'),LOD:get('BODY_LOD1'),W:{FL:get('WFL'),FR:get('WFR'),RL:get('WRL'),RR:get('WRR')}};
       if(t.BODY&&t.W.FL&&t.W.RL)MODELS[k]=t;if(Object.keys(MODELS).length===Object.keys(M).length)setTimeout(()=>{try{if(state==='menu')showMenuCars();}catch(e){}},0);},e=>console.warn('model '+k,e));}catch(e){console.warn('model '+k,e);}}})();

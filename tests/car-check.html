@@ -1,0 +1,10 @@
+<!doctype html><html><body><pre id="out">pending</pre><script>
+window.__shots={};const Q=new URLSearchParams(location.search);const f=document.createElement('iframe');f.src='../index.html?mptest=1'+(Q.get('pcgfx')?'&pcgfx='+Q.get('pcgfx'):'');f.style.cssText='width:1280px;height:720px;border:0';document.body.appendChild(f);
+const ev=js=>f.contentWindow.__mpEval(js);const wait=ms=>new Promise(r=>setTimeout(r,ms));
+f.onload=async()=>{try{await wait(9000);ev("window.__errs=[];window.addEventListener('error',e=>__errs.push(String(e.message)));const ce=console.error;console.error=(...a)=>{__errs.push(a.map(String).join(' ').slice(0,200));ce(...a)};S.quality='high';applyQualityMaterials();S.timeOfDay='day';");
+ const info=ev("(()=>{let v=0;MODELS.gt3.BODY.traverse(o=>{if(o.isMesh)v+=o.geometry.attributes.position.count;});return 'gt3 body vertices '+v+', hq file loaded '+!!window.APEX_MODELS_HQ;})()");
+ ev("startRace({track:0,cls:'touring',mode:'tt',seed:3,weather:'dry'});");await wait(5000);
+ window.__shots.rear=ev("(()=>{camMode='chase';for(let i=0;i<40;i++){updateCarVisuals(0);updateCamera(1);}const b=player,sh=Math.sin(b.heading),ch=Math.cos(b.heading);camera.position.set(b.x-sh*6.5+ch*2.2,(b.y||0)+1.6,b.z-ch*6.5-sh*2.2);camera.lookAt(b.x,(b.y||0)+0.6,b.z);renderFrame();return renderer.domElement.toDataURL('image/jpeg',0.88);})()");
+ window.__shots.side=ev("(()=>{const b=player,sh=Math.sin(b.heading),ch=Math.cos(b.heading);camera.position.set(b.x+ch*7,(b.y||0)+1.5,b.z-sh*7);camera.lookAt(b.x,(b.y||0)+0.5,b.z);renderFrame();return renderer.domElement.toDataURL('image/jpeg',0.88);})()");
+ document.getElementById('out').textContent=info+', errors '+ev('JSON.stringify(__errs.slice(0,3))');}catch(e){document.getElementById('out').textContent='ERR '+e.stack;}document.title='DONE';};
+</script></body></html>
