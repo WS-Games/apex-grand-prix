@@ -29,7 +29,12 @@ Open-wheelers, V8 touring cars, turbo street cars and go-karts. Nine tracks (inc
 
 Plug in an **Xbox or PlayStation controller** at any time — it's picked up automatically (with vibration).
 
-## 🆕 New in v1.9.7
+## 🆕 New in v1.9.8
+
+![Cleaner circuit](docs/screenshots/cleaner-circuit.jpg)
+
+- **Less clutter on every circuit:** about 60% fewer grass tufts and flowers, and about half as many bushes and rocks behind the barriers. The forest is unchanged.
+## New in v1.9.7
 
 ![Gilded Skyline Grand Prix](docs/screenshots/gilded-skyline.jpg)
 ![Alpine Lake Circuit](docs/screenshots/alpine-lake.jpg)

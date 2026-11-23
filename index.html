@@ -1477,9 +1477,9 @@ function buildForest(t,near,R){ensureFoliage();
     for(const im of [trunks,leaves,pines]){im.castShadow=false;im.receiveShadow=true;im.userData.tree=true;trackGroup.add(im);}} // far away: no shadow pass (they're outside the shadow area anyway)
   }
   // grass tufts and flowers on the verges, inside and just outside the barriers (kept at track height)
-  const city=!!t.def.metro;const tufts=[],flowers=[[],[],[]];const tMax=city?0:Math.round((({low:2000,medium:9000,high:20000,ultra:32000})[S.quality]??20000)*(isTouch?0.5:1));const hw=t.halfW;
+  const city=!!t.def.metro;const tufts=[],flowers=[[],[],[]];const tMax=city?0:Math.round((({low:1000,medium:4000,high:8000,ultra:12000})[S.quality]??8000)*(isTouch?0.5:1));const hw=t.halfW;
   for(let n=0;n<tMax*3&&tufts.length+flowers[0].length+flowers[1].length+flowers[2].length<tMax;n++){const i=Math.floor(R()*N);const side=R()<0.5?1:-1;const w=side>0?t.wallL[i]:t.wallR[i];const code=side>0?t.surfL[i]:t.surfR[i];
-    let o;if(R()<0.55){if(code!==0)continue;o=hw+3.6+R()*Math.max(0.5,w-hw-4.6);}else o=w+0.9+R()*5;if(t.pitD(i*t.sp)<t.pitLen+10&&side>0)continue;
+    let o;if(R()<0.25){if(code!==0)continue;o=hw+3.6+R()*Math.max(0.5,w-hw-4.6);}else o=w+0.9+R()*5;if(t.pitD(i*t.sp)<t.pitLen+10&&side>0)continue;
     const x=t.px[i]+t.nx[i]*side*o,z=t.pz[i]+t.nz[i]*side*o;if(near(x,z,hw+2.4))continue;const rr=R();const it={x,z,y:t.py[i]+bankY(i,side*o),s:0.7+R()*0.8,r:R()*6.283,h:rr<0.3?0.55+R()*0.3:(rr<0.75?0.9+R()*0.4:1.6+R()*1.2)};
     if(R()<0.22)flowers[Math.floor(R()*3)].push(it);else tufts.push(it);}
   const plant=(list,mat)=>{if(!list.length)return;const im=new THREE.InstancedMesh(FOL.tuftGeo,mat,list.length);list.forEach((d,k)=>{Q.setFromAxisAngle(Y,d.r);SC.set(d.s,d.s*(d.h||1),d.s);M.compose(PV.set(d.x,d.y,d.z),Q,SC);im.setMatrixAt(k,M);});im.receiveShadow=true;im.userData.trk=true;trackGroup.add(im);};
@@ -1928,7 +1928,7 @@ function buildScenery(){
   const {minx,maxx,minz,maxz}=t.bounds;const R=mulberry(77);const trees=[];
   if(!t.light)buildForest(t,near,R);const mm=new THREE.Matrix4(),q=new THREE.Quaternion(),sc=new THREE.Vector3();
   // --- bushes & rocks behind the barriers
-  {const bush=[],rock=[];const R3=mulberry(31);for(let i=0;i<N;i+=Math.max(2,Math.round(3/QF()))){if(t.pitD(i*t.sp)<t.pitLen+30)continue;const side=R3()<0.5?1:-1;const w=side>0?t.wallL[i]:t.wallR[i];const o=side*(w+5+R3()*12);const x=t.px[i]+t.nx[i]*o,z=t.pz[i]+t.nz[i]*o;if(near(x,z,w+3))continue;(R3()<0.8?bush:rock).push([x,z,0.6+R3()*0.9,R3()*6]);}
+  {const bush=[],rock=[];const R3=mulberry(31);for(let i=0;i<N;i+=Math.max(4,Math.round(7/QF()))){if(t.pitD(i*t.sp)<t.pitLen+30)continue;const side=R3()<0.5?1:-1;const w=side>0?t.wallL[i]:t.wallR[i];const o=side*(w+5+R3()*12);const x=t.px[i]+t.nx[i]*o,z=t.pz[i]+t.nz[i]*o;if(near(x,z,w+3))continue;(R3()<0.8?bush:rock).push([x,z,0.6+R3()*0.9,R3()*6]);}
    const bg=new THREE.IcosahedronGeometry(1.2,1);bg.translate(0,0.6,0);const rg=new THREE.DodecahedronGeometry(0.9,0);rg.translate(0,0.3,0);
    const bi=new THREE.InstancedMesh(bg,MAT.leaf,bush.length),ri=new THREE.InstancedMesh(rg,MAT.rock,rock.length);
    bush.forEach((p,k)=>{sc.set(p[2]*1.3,p[2],p[2]*1.3);q.setFromAxisAngle(new THREE.Vector3(0,1,0),p[3]);mm.compose(new THREE.Vector3(p[0],0,p[1]),q,sc);bi.setMatrixAt(k,mm);});
