@@ -1071,7 +1071,10 @@ function buildCrossings(){const t=TR,N=t.N,hw=t.halfW;if(!t.br)return;
     ribbon(s,c,i=>-(t.wallR[i]+0.6),i=>t.wallL[i]+0.6,-1.3,MAT.brC,10);
     for(const side of [1,-1]){const wall=side>0?t.wallL:t.wallR;wallRibbon(s,c,i=>side*(wall[i]+0.6),-1.3,1.75,MAT.brC,20);}
     if(t.def.embank){if(!MAT.grassDS){MAT.grassDS=MAT.grass.clone();MAT.grassDS.side=THREE.DoubleSide;}const pos=[],uv=[],ix=[];
-      for(let k=0;k<=c;k++){const i=(s+k)%N,yd=t.py[i]-1.3;const vs=[];for(const side of [-1,1]){const e=(side>0?t.wallL[i]:t.wallR[i])+0.6;const x0=t.px[i]+t.nx[i]*side*e,z0=t.pz[i]+t.nz[i]*side*e;const g1=t.terrain(x0,z0);const run=Math.max(0.6,(yd-g1+1.5)*1.8);const x1=t.px[i]+t.nx[i]*side*(e+run),z1=t.pz[i]+t.nz[i]*side*(e+run);const g2=t.terrain(x1,z1);vs.push([x1,Math.min(g2-1.5,yd-0.3),z1],[x0,yd,z0]);}
+      for(let k=0;k<=c;k++){const i=(s+k)%N,yd=t.py[i]-1.3;const vs=[];for(const side of [-1,1]){const e=(side>0?t.wallL[i]:t.wallR[i])+0.6;const x0=t.px[i]+t.nx[i]*side*e,z0=t.pz[i]+t.nz[i]*side*e;const g1=t.terrain(x0,z0);const run=Math.max(0.6,(yd-g1+1.5)*1.8);const x1=t.px[i]+t.nx[i]*side*(e+run),z1=t.pz[i]+t.nz[i]*side*(e+run);const g2=t.terrain(x1,z1);let y1=Math.min(g2-1.5,yd-0.3);
+          /* never let the slope fill the road (or tunnel) it crosses over: keep its foot above the roof */
+          let low=-1e9;for(const f of [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]){const sx=x0+(x1-x0)*f,sz=z0+(z1-z0)*f;for(let j=0;j<N;j+=2){if(t.br[j])continue;const dx=t.px[j]-sx,dz=t.pz[j]-sz;const lim=Math.max(t.wallL[j],t.wallR[j])+3;if(dx*dx+dz*dz<lim*lim&&Math.abs(t.py[j]-t.py[i])<14)low=Math.max(low,t.py[j]+(t.tn[j]?7.9:6.4));}}
+          const cap=t.py[i]-0.4;vs.push([x1,Math.max(y1,Math.min(low+0.7,cap)),z1],[x0,Math.max(yd,Math.min(low,cap)),z0]);}
         for(const v of vs){pos.push(v[0],v[1],v[2]);uv.push(v[0]/8,v[2]/8);}
         if(k<c){const b=k*4;ix.push(b,b+4,b+1,b+1,b+4,b+5,b+2,b+6,b+3,b+3,b+6,b+7);}}
       const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(ix);g.computeVertexNormals();const em=new THREE.Mesh(g,MAT.grassDS);em.receiveShadow=true;em.userData.trk=true;trackGroup.add(em);continue;}
@@ -1126,6 +1129,8 @@ function buildTrackMeshes(){
   ribbon(0,N,-hw,hw,0.03,dirt?(t.def.surface==='sand'?MAT.sand:MAT.dirt):MAT.asphalt,dirt?10:14);
   // grass verges at track height so hills never step down right at the edge
   if(t.hasH||dirt){const VM=t.def.metro?cityGround():MAT.verge;ribbon(0,N,hw,i=>t.wallL[i]+(t.br[i]||t.tn[i]?0.3:5),0.02,VM,8);ribbon(0,N,i=>-(t.wallR[i]+(t.br[i]||t.tn[i]?0.3:5)),-hw,0.02,VM,8);}
+  // inside tunnels the strip beside the road is dark concrete, not grass
+  for(const [s,c] of runsOf(i=>t.tn[i])){if(c>=N)break;if(!MAT.tunF)MAT.tunF=new THREE.MeshStandardMaterial({color:0x4a4c50,roughness:0.95});ribbon(s,c,hw,i=>t.wallL[i]+0.3,0.032,MAT.tunF,8);ribbon(s,c,i=>-(t.wallR[i]+0.3),-hw,0.032,MAT.tunF,8);}
   // edge lines
   if(!dirt){ribbon(0,N,hw-0.28,hw-0.08,0.045,MAT.white);ribbon(0,N,-hw+0.08,-hw+0.28,0.045,MAT.white);}
   // runoff & gravel
@@ -1492,11 +1497,11 @@ function buildForest(t,near,R){ensureFoliage();
     for(const im of [trunks,leaves,pines]){im.castShadow=false;im.receiveShadow=true;im.userData.tree=true;trackGroup.add(im);}} // far away: no shadow pass (they're outside the shadow area anyway)
   }
   // grass tufts and flowers on the verges, inside and just outside the barriers (kept at track height)
-  const city=!!t.def.metro;const tufts=[],flowers=[[],[],[]];const tMax=city?0:Math.round((({low:1000,medium:4000,high:8000,ultra:12000})[S.quality]??8000)*(isTouch?0.5:1));const hw=t.halfW;
+  const city=!!t.def.metro;const tufts=[],flowers=[[],[],[]];const tMax=city?0:Math.round((({low:500,medium:1800,high:3600,ultra:5400})[S.quality]??3600)*(isTouch?0.5:1));const hw=t.halfW;
   for(let n=0;n<tMax*3&&tufts.length+flowers[0].length+flowers[1].length+flowers[2].length<tMax;n++){const i=Math.floor(R()*N);const side=R()<0.5?1:-1;const w=side>0?t.wallL[i]:t.wallR[i];const code=side>0?t.surfL[i]:t.surfR[i];
     let o;if(R()<0.25){if(code!==0)continue;o=hw+3.6+R()*Math.max(0.5,w-hw-4.6);}else o=w+0.9+R()*5;if(t.pitD(i*t.sp)<t.pitLen+10&&side>0)continue;
-    const x=t.px[i]+t.nx[i]*side*o,z=t.pz[i]+t.nz[i]*side*o;if(near(x,z,hw+2.4))continue;const rr=R();const it={x,z,y:t.py[i]+bankY(i,side*o),s:0.7+R()*0.8,r:R()*6.283,h:rr<0.3?0.55+R()*0.3:(rr<0.75?0.9+R()*0.4:1.6+R()*1.2)};
-    if(R()<0.22)flowers[Math.floor(R()*3)].push(it);else tufts.push(it);}
+    const x=t.px[i]+t.nx[i]*side*o,z=t.pz[i]+t.nz[i]*side*o;if(near(x,z,hw+2.4)||t.br[i]||t.tn[i])continue;const rr=R();const it={x,z,y:t.py[i]+bankY(i,side*o),s:0.7+R()*0.8,r:R()*6.283,h:rr<0.3?0.55+R()*0.3:(rr<0.75?0.9+R()*0.4:1.6+R()*1.2)};
+    if(Math.abs(it.y-groundAtSafe(t,x,z))>0.7)continue;if(R()<0.22)flowers[Math.floor(R()*3)].push(it);else tufts.push(it);}
   const plant=(list,mat)=>{if(!list.length)return;const im=new THREE.InstancedMesh(FOL.tuftGeo,mat,list.length);list.forEach((d,k)=>{Q.setFromAxisAngle(Y,d.r);SC.set(d.s,d.s*(d.h||1),d.s);M.compose(PV.set(d.x,d.y,d.z),Q,SC);im.setMatrixAt(k,M);});im.receiveShadow=true;im.userData.trk=true;trackGroup.add(im);};
   plant(tufts,FOL.grassMat);flowers.forEach((l,k)=>plant(l,FOL.flowerMats[k]));
   // meadows: grass spread over the open ground beyond the barriers (sits on the terrain via liftScenery)
@@ -1943,7 +1948,7 @@ function buildScenery(){
   const {minx,maxx,minz,maxz}=t.bounds;const R=mulberry(77);const trees=[];
   if(!t.light)buildForest(t,near,R);const mm=new THREE.Matrix4(),q=new THREE.Quaternion(),sc=new THREE.Vector3();
   // --- bushes & rocks behind the barriers
-  {const bush=[],rock=[];const R3=mulberry(31);for(let i=0;i<N;i+=Math.max(4,Math.round(7/QF()))){if(t.pitD(i*t.sp)<t.pitLen+30)continue;const side=R3()<0.5?1:-1;const w=side>0?t.wallL[i]:t.wallR[i];const o=side*(w+5+R3()*12);const x=t.px[i]+t.nx[i]*o,z=t.pz[i]+t.nz[i]*o;if(near(x,z,w+3))continue;(R3()<0.8?bush:rock).push([x,z,0.6+R3()*0.9,R3()*6]);}
+  {const bush=[],rock=[];const R3=mulberry(31);for(let i=0;i<N;i+=Math.max(8,Math.round(14/QF()))){if(t.pitD(i*t.sp)<t.pitLen+30||t.br[i]||t.tn[i])continue;const side=R3()<0.5?1:-1;const w=side>0?t.wallL[i]:t.wallR[i];const o=side*(w+5+R3()*12);const x=t.px[i]+t.nx[i]*o,z=t.pz[i]+t.nz[i]*o;if(near(x,z,w+3))continue;(R3()<0.8?bush:rock).push([x,z,0.6+R3()*0.9,R3()*6]);}
    const bg=new THREE.IcosahedronGeometry(1.2,1);bg.translate(0,0.6,0);const rg=new THREE.DodecahedronGeometry(0.9,0);rg.translate(0,0.3,0);
    const bi=new THREE.InstancedMesh(bg,MAT.leaf,bush.length),ri=new THREE.InstancedMesh(rg,MAT.rock,rock.length);
    bush.forEach((p,k)=>{sc.set(p[2]*1.3,p[2],p[2]*1.3);q.setFromAxisAngle(new THREE.Vector3(0,1,0),p[3]);mm.compose(new THREE.Vector3(p[0],0,p[1]),q,sc);bi.setMatrixAt(k,mm);});

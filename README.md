@@ -29,7 +29,15 @@ Open-wheelers, V8 touring cars, turbo street cars and go-karts. Nine tracks (inc
 
 Plug in an **Xbox or PlayStation controller** at any time — it's picked up automatically (with vibration).
 
-## 🆕 New in v1.9.9
+## 🆕 New in v1.9.10
+
+![Tunnel floor](docs/screenshots/tunnel-floor.jpg)
+
+- **Tunnels:** no more grass inside them. The strip beside the road is dark concrete, and bridge slopes no longer cut into the tunnel underneath.
+- **Cleaner maps:** about half as many grass tufts, flowers, bushes and rocks again, with less floating plant life near raised sections.
+- Physics unchanged.
+
+## New in v1.9.9
 
 ![Gum trees](docs/screenshots/gum-trees.jpg)
 
