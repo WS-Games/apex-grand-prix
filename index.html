@@ -1387,7 +1387,22 @@ function vegLoad(){if(!PC_GFX||VEG.loading)return;VEG.loading=true;const L=new G
         if(m.map)m.map.anisotropy=MAXANI;if(/leaves|twigs/i.test(m.name||'')||(m.map&&m.map.format===THREE.RGBAFormat&&/leaves|twigs/i.test(m.name||''))){m.alphaTest=0.5;m.transparent=false;m.side=THREE.DoubleSide;}return m;});
       mesh.geometry.computeBoundingBox();const bb=mesh.geometry.boundingBox;
       return{geo:mesh.geometry,mats,H:bb.max.y,R:Math.max(Math.abs(bb.min.x),bb.max.x,Math.abs(bb.min.z),bb.max.z),conifer:k===1};});
+    try{VEG.sp[0]=makeGumSpecies();}catch(e){console.warn('gum',e);}
     vegBake();VEG.ready=true;}).catch(e=>{console.warn(e);VEG.loading=false;});}
+/* one big gum tree: a pale leaning trunk and a single wide, rounded, lumpy canopy (replaces the scanned broadleaf, which read as stacked tufts) */
+function makeGumSpecies(){const R=mulberry(2024);const V=THREE.Vector3;
+  const paint=(g,c,jit)=>{const n=g.attributes.position.count,a=new Float32Array(n*3);for(let i=0;i<n;i++){const k=1+(R()-0.5)*jit;a[i*3]=c.r*k;a[i*3+1]=c.g*k;a[i*3+2]=c.b*k;}g.setAttribute('color',new THREE.BufferAttribute(a,3));return g;};
+  const trunkParts=[],leafParts=[];
+  const lean=new V(0.18,1,0.1).normalize();
+  const tr=new THREE.CylinderGeometry(0.1,0.2,2.6,7,3);tr.translate(0,1.3,0);{const p=tr.attributes.position;for(let i=0;i<p.count;i++){const y=p.getY(i);p.setX(i,p.getX(i)+y*0.07);p.setZ(i,p.getZ(i)+y*0.04);}}trunkParts.push(paint(tr.toNonIndexed(),new THREE.Color(0xcdbfa6),0.25));
+  for(const [dx,dy,dz,len] of [[0.9,3.3,0.2,1.1],[-0.8,3.2,-0.3,1.0],[0.1,3.6,-0.9,0.9]]){const b=new THREE.CylinderGeometry(0.04,0.09,len*1.3,5);b.translate(0,len*0.65,0);b.rotateZ(-Math.atan2(dx,1.2));b.rotateX(Math.atan2(dz,1.2));b.translate(0.12,dy-1.2,0.05);trunkParts.push(paint(b.toNonIndexed(),new THREE.Color(0xbfae93),0.2));}
+  const clumps=[[0,3.55,0,1.55],[1.15,3.2,0.35,1.2],[-1.1,3.25,-0.3,1.2],[0.25,3.3,1.15,1.15],[-0.3,3.35,-1.1,1.15],[0.55,4.2,-0.2,1.0],[-0.6,4.05,0.45,0.95],[1.7,2.95,-0.5,0.85],[-1.7,2.9,0.5,0.85]];
+  for(const [x,y,z,r] of clumps){const g=new THREE.IcosahedronGeometry(r,2);const p=g.attributes.position;for(let i=0;i<p.count;i++){const v=new V(p.getX(i),p.getY(i),p.getZ(i));const n=1+0.16*Math.sin(v.x*5.1+x)*Math.cos(v.z*4.3+z)+0.1*Math.sin(v.y*6.7+y);p.setXYZ(i,v.x*n,v.y*n*0.78,v.z*n);}
+    g.translate(x,y,z);const c=new THREE.Color().setHSL(0.24+R()*0.05,0.34+R()*0.08,0.2+R()*0.06);leafParts.push(paint(g.toNonIndexed(),c,0.5));}
+  const unify=a=>a.map(g=>{g.deleteAttribute('uv');return g;});
+  const geo=mergeGeometries([mergeGeometries(unify(trunkParts)),mergeGeometries(unify(leafParts))],true);geo.computeVertexNormals();geo.computeBoundingBox();const bb=geo.boundingBox;
+  const m=new THREE.MeshStandardMaterial({vertexColors:true,roughness:0.9,metalness:0,flatShading:false});
+  return{geo,mats:[m,m],H:bb.max.y,R:Math.max(Math.abs(bb.min.x),bb.max.x,Math.abs(bb.min.z),bb.max.z),conifer:false};}
 function vegBake(){const N=16,COLS=4,rows=N/COLS;const old={rt:renderer.getRenderTarget(),col:renderer.getClearColor(new THREE.Color()),a:renderer.getClearAlpha(),xr:renderer.shadowMap.enabled};renderer.shadowMap.enabled=false;
   for(const sp of VEG.sp){const cw=256,ch=Math.max(128,Math.min(512,Math.round(256*sp.H/(2*sp.R))));const rt=new THREE.WebGLRenderTarget(cw*COLS,ch*rows,{minFilter:THREE.LinearMipmapLinearFilter,magFilter:THREE.LinearFilter,generateMipmaps:true,type:THREE.HalfFloatType});rt.texture.anisotropy=4;
     const sc=new THREE.Scene();const mesh=new THREE.Mesh(sp.geo,sp.mats);sc.add(mesh);sc.add(new THREE.AmbientLight(0xffffff,1.9));const dl=new THREE.DirectionalLight(0xfff1dc,3.0);sc.add(dl);
@@ -1398,22 +1413,22 @@ function vegBake(){const N=16,COLS=4,rows=N/COLS;const old={rt:renderer.getRende
     sp.imp={tex:rt.texture,rt,W:sp.R*2,H:sp.H,N,COLS,rows};}
   renderer.setRenderTarget(old.rt);renderer.setClearColor(old.col,old.a);renderer.shadowMap.enabled=old.xr;vegImpMaterial();}
 function vegImpMaterial(){for(const sp of VEG.sp){const im=sp.imp;
-  sp.impMat=new THREE.ShaderMaterial({fog:true,side:THREE.DoubleSide,transparent:false,uniforms:THREE.UniformsUtils.merge([THREE.UniformsLib.fog,{map:{value:im.tex},tint:{value:new THREE.Color(1,1,1)},cut:{value:30},grid:{value:new THREE.Vector3(im.N,im.COLS,im.rows)}}]),
+  sp.impMat=new THREE.ShaderMaterial({fog:true,side:THREE.DoubleSide,transparent:false,uniforms:THREE.UniformsUtils.merge([THREE.UniformsLib.fog,{map:{value:im.tex},tint:{value:new THREE.Color(1,1,1)},cut:{value:30},dim:{value:new THREE.Vector2(im.W,im.H)},grid:{value:new THREE.Vector3(im.N,im.COLS,im.rows)}}]),
   vertexShader:`#include <common>
     #include <fog_pars_vertex>
-    uniform vec3 grid;varying vec2 vA;varying vec2 vB;varying float vF;varying float vD;
+    uniform vec3 grid;uniform vec2 dim;varying vec2 vA;varying vec2 vB;varying float vF;varying float vD;
     vec2 cellUv(float i,vec2 p){float c=mod(i,grid.y),r=floor(i/grid.y);return vec2((c+p.x)/grid.y,1.0-(r+1.0-p.y)/grid.z);}
     void main(){mat4 im=instanceMatrix;vec3 org=(modelMatrix*im*vec4(0.,0.,0.,1.)).xyz;float s=length(im[0].xyz);vec3 d=cameraPosition-org;vD=length(d);vec2 h=normalize(d.xz+vec2(1e-5));vec3 right=vec3(h.y,0.,-h.x);
       vec3 wp=org+right*position.x*s+vec3(0.,1.,0.)*position.y*s;
       float a=atan(d.x,d.z)+fract(sin(org.x*12.9898+org.z*78.233)*43758.5453)*6.2831853;float f=a/6.2831853*grid.x;f=mod(f,grid.x);float i0=floor(f);vF=f-i0;float i1=mod(i0+1.0,grid.x);
-      vec2 p=vec2(position.x+0.5,position.y);vA=cellUv(i0,p);vB=cellUv(i1,p);
+      vec2 p=vec2(position.x/dim.x+0.5,position.y/dim.y);vA=cellUv(i0,p);vB=cellUv(i1,p);
       vec4 mvPosition=viewMatrix*vec4(wp,1.0);gl_Position=projectionMatrix*mvPosition;
       #include <fog_vertex>
 }`,
   fragmentShader:`uniform sampler2D map;uniform vec3 tint;uniform float cut;varying vec2 vA;varying vec2 vB;varying float vF;varying float vD;
     #include <common>
     #include <fog_pars_fragment>
-    void main(){if(vD<cut)discard;vec4 a=texture2D(map,vA),b=texture2D(map,vB);vec4 c=mix(a,b,vF);if(c.a<0.5)discard;gl_FragColor=vec4(c.rgb*tint,1.0);
+    void main(){if(vD<cut)discard;vec4 a=texture2D(map,vA),b=texture2D(map,vB);vec4 c=mix(a,b,vF);if(c.a<0.16)discard;gl_FragColor=vec4(c.rgb/max(c.a,0.5)*tint,1.0);
       #include <tonemapping_fragment>
       #include <colorspace_fragment>
       #include <fog_fragment>
@@ -1426,7 +1441,7 @@ function vegImpMaterial(){for(const sp of VEG.sp){const im=sp.imp;
 function vegTint(t){if(!VEG.ready||!t)return;const f=Math.max(0.45,Math.min(1.1,0.45+0.12*t.sunI+0.18*t.hemi));const c=new THREE.Color(t.sunC).lerp(new THREE.Color(1,1,1),0.65).multiplyScalar(f);for(const sp of VEG.sp){sp.impMat.uniforms.tint.value.copy(c);if(sp.impMatNear)sp.impMatNear.uniforms.tint.value.copy(c);}}
 /* place everything: real meshes near the track, impostors for the rest, plus a huge outer forest */
 function vegBuild(t,near,R,det,pitBox,inLake){const {minx,maxx,minz,maxz}=t.bounds,def=t.def;
-  const conf=def.alpine?0.55:(def.metro?0.2:(def.id==='ballarat'?0.12:(0.15+((def.id.length*7)%4)*0.05)));
+  const conf=def.alpine?0.15:0; /* gum-style broadleaf trees everywhere; the tiered conifers looked like stacked trees */
   const cap=({medium:7000,high:22000,ultra:36000})[S.quality]||7000,nearCap=({medium:0,high:900,ultra:1600})[S.quality]||0;
   if(def.embank&&!t.brPts){t.brPts=[];for(let i=0;i<t.N;i+=3)if(t.br[i])t.brPts.push([t.px[i],t.pz[i],(Math.max(0,t.py[i]+0.2))*1.8+t.wallL[i]+3]);}
   const lst=[[],[]],nearL=[[],[]],twin=[[],[]];const free=(x,z,m)=>!pitBox(x,z)&&!(t.brPts&&t.brPts.some(p=>Math.hypot(p[0]-x,p[1]-z)<p[2]+m))&&!inLake(x,z,m)&&!(t.bldg||[]).some(b=>Math.hypot(b.x-x,b.z-z)<b.r+8+m*0.5)&&!(t.pads||[]).some(p=>Math.hypot(p.x-x,p.z-z)<p.r+6+m)&&!t.tvCams.some(cm=>Math.hypot(cm.x-x,cm.z-z)<18+m*0.3);

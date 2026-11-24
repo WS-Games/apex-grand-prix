@@ -29,6 +29,13 @@ Open-wheelers, V8 touring cars, turbo street cars and go-karts. Nine tracks (inc
 
 Plug in an **Xbox or PlayStation controller** at any time — it's picked up automatically (with vibration).
 
+## 🆕 New in v1.9.9
+
+![Gum trees](docs/screenshots/gum-trees.jpg)
+
+- **One big tree, not stacked trees:** forests now use rounded gum-style trees (pale trunk, one wide canopy). Fixed the distant-tree sprites that were being sampled wrongly and stacked into thin tufts.
+- Alpine circuits keep a few pines. Phones and Low quality unchanged. Physics unchanged.
+
 ## 🆕 New in v1.9.8
 
 ![Cleaner circuit](docs/screenshots/cleaner-circuit.jpg)
